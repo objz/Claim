@@ -1,0 +1,9 @@
+name: Claim
+version: 1.0.0
+main: dev.objz.claim.Claim
+api-version: '1.21'
+folia-supported: true
+depend:
+  - ProtocolLib
+softdepend:
+  - BlueMap
