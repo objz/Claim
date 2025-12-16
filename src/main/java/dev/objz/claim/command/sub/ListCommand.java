@@ -30,10 +30,15 @@ public class ListCommand {
 
 					player.sendMessage(Component.text("Your Claims:", NamedTextColor.GOLD));
 					for (ClaimRegion claim : claims) {
+						int x = (int) claim.getRegion().getCenter().getX();
+						int z = (int) claim.getRegion().getCenter().getZ();
+
 						player.sendMessage(Component
 								.text("- " + claim.getName(), NamedTextColor.AQUA)
 								.append(Component.text(
-										" (" + claim.getWorldName() + ")",
+										" (" + x + ", " + z + " in "
+												+ claim.getWorldName()
+												+ ")",
 										NamedTextColor.GRAY)));
 					}
 				});

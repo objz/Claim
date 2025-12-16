@@ -287,11 +287,12 @@ public class BorderVisualizer {
 			List<WrappedDataValue> dataValues = new ArrayList<>();
 
 			byte flags = 0x20; // Invisible
-			dataValues.add(new WrappedDataValue(0, WrappedDataWatcher.Registry.get(Byte.class), flags));
+			dataValues.add(new WrappedDataValue(0, WrappedDataWatcher.Registry.get((Type) Byte.class),
+					flags));
 
 			// Scale
 			Vector3f scale = new Vector3f(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
-			dataValues.add(new WrappedDataValue(12, WrappedDataWatcher.Registry.get(Vector3f.class),
+			dataValues.add(new WrappedDataValue(12, WrappedDataWatcher.Registry.get((Type) Vector3f.class),
 					scale));
 
 			// ItemStack display
