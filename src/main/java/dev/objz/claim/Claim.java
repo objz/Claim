@@ -1,0 +1,86 @@
+package dev.objz.claim;
+
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIPaperConfig;
+import dev.objz.claim.command.ClaimCommands;
+import dev.objz.claim.gui.GuiManager;
+import dev.objz.claim.integration.ClaimBlueMap;
+import dev.objz.claim.listener.ClaimListener;
+import dev.objz.claim.manager.ClaimManager;
+import dev.objz.claim.manager.SelectionManager;
+import dev.objz.claim.visual.BorderVisualizer;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class Claim extends JavaPlugin {
+
+	private static Claim instance;
+	private ClaimManager claimManager;
+	private SelectionManager selectionManager;
+	private BorderVisualizer borderVisualizer;
+	private GuiManager guiManager;
+	private ClaimBlueMap blueMapIntegration;
+
+	@Override
+	public void onLoad() {
+		CommandAPI.onLoad(new CommandAPIPaperConfig(this).verboseOutput(true));
+	}
+
+	@Override
+	public void onEnable() {
+		instance = this;
+		CommandAPI.onEnable();
+
+		// Managers
+		this.borderVisualizer = new BorderVisualizer(this);
+		this.claimManager = new ClaimManager(this);
+		this.selectionManager = new SelectionManager(this);
+		this.guiManager = new GuiManager(this);
+
+		new ClaimCommands(this).register();
+		getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
+		getServer().getPluginManager().registerEvents(selectionManager, this);
+		getServer().getPluginManager().registerEvents(guiManager, this);
+
+		// Integrations
+		if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
+			this.blueMapIntegration = new ClaimBlueMap(this);
+			this.blueMapIntegration.enable();
+		}
+
+		getLogger().info("Claim plugin enabled for Folia!");
+	}
+
+	@Override
+	public void onDisable() {
+		CommandAPI.onDisable();
+		if (blueMapIntegration != null) {
+			blueMapIntegration.disable();
+		}
+		if (borderVisualizer != null) {
+			borderVisualizer.cleanup();
+		}
+		if (claimManager != null) {
+			claimManager.saveClaims();
+		}
+	}
+
+	public static Claim getInstance() {
+		return instance;
+	}
+
+	public ClaimManager getClaimManager() {
+		return claimManager;
+	}
+
+	public SelectionManager getSelectionManager() {
+		return selectionManager;
+	}
+
+	public BorderVisualizer getBorderVisualizer() {
+		return borderVisualizer;
+	}
+
+	public GuiManager getGuiManager() {
+		return guiManager;
+	}
+}

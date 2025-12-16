@@ -4,6 +4,8 @@
 .project
 repomix-output.xml
 .gitattributes
+.classpath
 
 # Ignore Gradle build output directory
 build/
+bin/
