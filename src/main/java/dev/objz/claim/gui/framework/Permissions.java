@@ -17,8 +17,15 @@ public abstract class Permissions extends Menu {
 	protected final Claim plugin;
 	protected final Map<Integer, PlayerFlags> slotToFlag;
 
+	private static final int[] SLOTS = {
+			10, 19, 28,
+			12, 21, 30,
+			14, 23, 32,
+			16, 25, 34
+	};
+
 	public Permissions(Claim plugin, Region claim, Component title) {
-		super(claim, SIZE_SMALL, title);
+		super(claim, SIZE_MEDIUM, title);
 		this.plugin = plugin;
 		this.slotToFlag = new HashMap<>();
 	}
@@ -29,22 +36,31 @@ public abstract class Permissions extends Menu {
 
 	protected abstract void onBack(Player player);
 
+	protected Boolean getInheritedState(PlayerFlags flag) {
+		return null;
+	}
+
 	@Override
 	protected void build() {
 		PlayerFlags[] flags = PlayerFlags.values();
-		int[] slots = { 10, 11, 12, 14, 15, 16 };
 
-		for (int i = 0; i < Math.min(flags.length, slots.length); i++) {
+		for (int i = 0; i < Math.min(flags.length, SLOTS.length); i++) {
 			PlayerFlags flag = flags[i];
 			Boolean state = getPermissionState(flag);
+			Boolean inherited = getInheritedState(flag);
 
-			slotToFlag.put(slots[i], flag);
+			int slot = SLOTS[i];
+			slotToFlag.put(slot, flag);
 
 			List<Component> lore = new ArrayList<>();
 			Component status;
 
 			if (state == null) {
-				status = Component.text("INHERIT", NamedTextColor.GRAY);
+				Component inheritedStatus = Component.text(
+						inherited != null && inherited ? "ENABLED" : "DISABLED",
+						inherited != null && inherited ? NamedTextColor.GREEN
+								: NamedTextColor.RED);
+				status = Component.text("INHERIT ", NamedTextColor.GRAY).append(inheritedStatus);
 			} else if (state) {
 				status = Component.text("ENABLED", NamedTextColor.GREEN);
 			} else {
@@ -60,11 +76,11 @@ public abstract class Permissions extends Menu {
 				lore.add(Component.text("Middle-Click to Inherit", NamedTextColor.YELLOW));
 			}
 
-			setItem(slots[i], flag.getIcon(), Component.text(flag.getDisplayName(), NamedTextColor.AQUA),
-					lore, state != null && state);
+			setItem(slot, flag.getIcon(), Component.text(flag.getDisplayName(), NamedTextColor.AQUA),
+					lore, (state != null ? state : (inherited != null && inherited)));
 		}
 
-		setItem(22, HeadUtil.createCustomHead("Back", HeadUtil.ARROW_LEFT,
+		setItem(40, HeadUtil.createCustomHead("Back", HeadUtil.ARROW_LEFT,
 				List.of(Component.text("Return to previous menu", NamedTextColor.GRAY))));
 
 		fillBorders();
@@ -76,7 +92,7 @@ public abstract class Permissions extends Menu {
 
 	@Override
 	public void handleClick(Player player, int slot, ClickType clickType) {
-		if (slot == 22) {
+		if (slot == 40) {
 			playBackSound(player);
 			onBack(player);
 			return;

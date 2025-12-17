@@ -3,12 +3,25 @@ package dev.objz.claim.model;
 import org.bukkit.Material;
 
 public enum PlayerFlags {
+	// Column 1: Construction
 	BLOCK_BREAK("Break Blocks", Material.IRON_PICKAXE, false),
 	BLOCK_PLACE("Place Blocks", Material.GRASS_BLOCK, false),
-	INTERACT("Interact", Material.LEVER, true),
-	CONTAINER_ACCESS("Open Containers", Material.CHEST, false),
-	DROP_ITEMS("Drop Items", Material.BUNDLE, true),
-	PICKUP_ITEMS("Pickup Items", Material.HOPPER, true);
+	BUCKET_FILL("Scoop Liquids", Material.BUCKET, false),
+
+	// Column 2: Interaction
+	INTERACT_DOORS("Use Doors", Material.OAK_DOOR, true),
+	INTERACT_REDSTONE("Use Redstone", Material.LEVER, false),
+	INTERACT_CONTAINERS("Open Containers", Material.CHEST, false),
+
+	// Column 3: Entities
+	INTERACT_ENTITY("Interact Entities", Material.SHEARS, false),
+	DAMAGE_ENTITY("Damage Entities", Material.IRON_SWORD, false),
+	USE_ENDER_PEARL("Use Ender Pearl", Material.ENDER_PEARL, true),
+
+	// Column 4: Items & Misc
+	ITEM_DROP("Drop Items", Material.BUNDLE, true),
+	ITEM_PICKUP("Pickup Items", Material.HOPPER, true),
+	USE_FLINT_AND_STEEL("Use Flint & Steel", Material.FLINT_AND_STEEL, false);
 
 	private final String displayName;
 	private final Material icon;

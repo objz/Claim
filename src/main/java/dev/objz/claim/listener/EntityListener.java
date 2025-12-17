@@ -2,6 +2,7 @@ package dev.objz.claim.listener;
 
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.GlobalFlags;
+import dev.objz.claim.model.PlayerFlags;
 import dev.objz.claim.model.Region;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -25,6 +26,7 @@ public class EntityListener extends AbstractListener {
 		Entity entity = event.getEntity();
 		boolean isBlockSource = entity instanceof TNTPrimed;
 		boolean isWindCharge = entity.getType().name().contains("WIND_CHARGE");
+
 		if (isWindCharge) {
 			if (!claim.getFlag(GlobalFlags.WIND_CHARGE)) {
 				event.setCancelled(true);
@@ -104,18 +106,28 @@ public class EntityListener extends AbstractListener {
 		if (claim.isEmpty())
 			return;
 
-		if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
-				|| event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
-
-			if (event instanceof EntityDamageByEntityEvent edbe) {
-				Entity damager = edbe.getDamager();
-				if (damager.getType().name().contains("WIND_CHARGE")) {
-					if (!claim.get().getFlag(GlobalFlags.WIND_CHARGE)) {
-						event.setCancelled(true);
-					}
+		if (event instanceof EntityDamageByEntityEvent edbe) {
+			Entity damager = edbe.getDamager();
+			if (damager.getType().name().contains("WIND_CHARGE")) {
+				if (!claim.get().getFlag(GlobalFlags.WIND_CHARGE)) {
+					event.setCancelled(true);
 					return;
 				}
 			}
+
+			if (damager instanceof Player p) {
+				if (checkPermission(p, event.getEntity().getLocation(), PlayerFlags.DAMAGE_ENTITY)) {
+					return;
+				} else {
+					event.setCancelled(true);
+					sendDenyMessage(p);
+					return;
+				}
+			}
+		}
+
+		if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
+				|| event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
 
 			if (event instanceof EntityDamageByEntityEvent edbe) {
 				Entity damager = edbe.getDamager();
@@ -139,8 +151,10 @@ public class EntityListener extends AbstractListener {
 		}
 
 		if (!(event.getEntity() instanceof Player)) {
-			if (!claim.get().getFlag(GlobalFlags.ENTITY_DAMAGE)) {
-				event.setCancelled(true);
+			if (!(event instanceof EntityDamageByEntityEvent edbe && edbe.getDamager() instanceof Player)) {
+				if (!claim.get().getFlag(GlobalFlags.ENTITY_DAMAGE)) {
+					event.setCancelled(true);
+				}
 			}
 		}
 	}

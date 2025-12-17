@@ -143,9 +143,13 @@ public class Region {
 				if (role == Roles.OWNER || role == Roles.ADMIN) {
 					perms.put(flag, true);
 				} else if (role == Roles.BUILDER) {
-					perms.put(flag, flag == PlayerFlags.BLOCK_BREAK
-							|| flag == PlayerFlags.BLOCK_PLACE
-							|| flag == PlayerFlags.INTERACT);
+					boolean builderPerm = switch (flag) {
+						case BLOCK_BREAK, BLOCK_PLACE, BUCKET_FILL -> true;
+						case INTERACT_DOORS, INTERACT_REDSTONE, INTERACT_CONTAINERS -> true;
+						case ITEM_DROP, ITEM_PICKUP, USE_ENDER_PEARL -> true;
+						default -> false;
+					};
+					perms.put(flag, builderPerm);
 				} else {
 					perms.put(flag, flag.getDefaultValue());
 				}

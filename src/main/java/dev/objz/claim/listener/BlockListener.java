@@ -36,10 +36,13 @@ public class BlockListener extends AbstractListener {
 			return;
 		}
 
+		// Sponge check
 		if (event.getBlock().getType() == Material.SPONGE
 				|| event.getBlock().getType() == Material.WET_SPONGE) {
 			Optional<Region> claim = plugin.getClaimManager().getClaimAt(event.getBlock().getLocation());
 			if (claim.isPresent() && !claim.get().getFlag(GlobalFlags.SPONGE_ABSORB)) {
+				// We don't cancel placement here as we can't easily predict absorb,
+				// but absorption event will handle it.
 			}
 		}
 	}
@@ -87,6 +90,14 @@ public class BlockListener extends AbstractListener {
 		Optional<Region> claim = plugin.getClaimManager().getClaimAt(event.getBlock().getLocation());
 		if (claim.isEmpty())
 			return;
+
+		// Check for player ignition bypass
+		if (event.getPlayer() != null) {
+			if (checkPermission(event.getPlayer(), event.getBlock().getLocation(),
+					PlayerFlags.USE_FLINT_AND_STEEL)) {
+				return;
+			}
+		}
 
 		if (event.getCause() == BlockIgniteEvent.IgniteCause.SPREAD) {
 			if (!claim.get().getFlag(GlobalFlags.FIRE_SPREAD)) {

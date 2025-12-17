@@ -4,6 +4,7 @@ import dev.objz.claim.Claim;
 import dev.objz.claim.gui.framework.Permissions;
 import dev.objz.claim.model.PlayerFlags;
 import dev.objz.claim.model.Region;
+import dev.objz.claim.model.Roles;
 import dev.objz.claim.util.HeadUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -33,6 +34,12 @@ public class EditPermissions extends Permissions {
 	@Override
 	protected Boolean getPermissionState(PlayerFlags flag) {
 		return claim.getPlayerFlagOverride(targetPlayer, flag);
+	}
+
+	@Override
+	protected Boolean getInheritedState(PlayerFlags flag) {
+		Roles role = claim.getRole(targetPlayer);
+		return claim.getFlag(role, flag);
 	}
 
 	@Override

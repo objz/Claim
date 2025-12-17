@@ -14,7 +14,7 @@ public class ItemListener extends AbstractListener {
 
 	@EventHandler
 	public void onDropItem(PlayerDropItemEvent event) {
-		if (!checkPermission(event.getPlayer(), event.getPlayer().getLocation(), PlayerFlags.DROP_ITEMS)) {
+		if (!checkPermission(event.getPlayer(), event.getPlayer().getLocation(), PlayerFlags.ITEM_DROP)) {
 			event.setCancelled(true);
 			sendDenyMessage(event.getPlayer());
 		}
@@ -22,7 +22,7 @@ public class ItemListener extends AbstractListener {
 
 	@EventHandler
 	public void onPickupItem(PlayerAttemptPickupItemEvent event) {
-		if (!checkPermission(event.getPlayer(), event.getItem().getLocation(), PlayerFlags.PICKUP_ITEMS)) {
+		if (!checkPermission(event.getPlayer(), event.getItem().getLocation(), PlayerFlags.ITEM_PICKUP)) {
 			event.setCancelled(true);
 		}
 	}
