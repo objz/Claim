@@ -25,11 +25,15 @@ public class MovementListener extends AbstractListener {
 
 		if (to.isPresent() && (from.isEmpty() || !from.get().getId().equals(to.get().getId()))) {
 			event.getPlayer().sendActionBar(
-					MessageUtil.parse("<gradient:#00aaff:#00ffaa>Entered " + to.get().getName()
-							+ "</gradient>"));
+					MessageUtil.parse("<gray>Entered</gray> <gradient:#00aaff:#00ffaa><bold>"
+							+ to.get().getName()
+							+ "</bold></gradient>", false));
 		} else if (from.isPresent() && to.isEmpty()) {
 			event.getPlayer().sendActionBar(
-					MessageUtil.parse("<yellow>Left " + from.get().getName()));
+					MessageUtil.parse(
+							"<gray>Left</gray> <gradient:#ffaa00:#ff5555><bold>"
+									+ from.get().getName() + "</bold></gradient>",
+							false));
 		}
 	}
 }
