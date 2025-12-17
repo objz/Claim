@@ -21,6 +21,9 @@ public class ClaimCommands {
 				.withSubcommand(new DeleteCommand(plugin).getCommand())
 				.withSubcommand(new TransferCommand(plugin).getCommand())
 				.withSubcommand(new AdminCommand(plugin).getCommand())
+				.withSubcommand(new ResizeCommand(plugin).getCommand())
+				.withSubcommand(new MemberCommand(plugin).getCommand())
+				.withSubcommand(new FlagCommand(plugin).getCommand())
 				.executesPlayer((player, args) -> {
 					new InfoCommand(plugin).execute(player, args);
 				})

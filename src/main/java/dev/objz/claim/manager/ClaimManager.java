@@ -48,11 +48,13 @@ public class ClaimManager {
 		return claim;
 	}
 
+	public void resizeClaim(Region claim, BoundingBox newBox) {
+		claim.resize(newBox);
+		saveClaims();
+	}
+
 	public void transferClaim(Region claim, UUID newOwner) {
 		claim.setOwner(newOwner);
-		// Ensure the new owner has the OWNER role and old owner is removed from
-		// specific roles if needed
-		// The Region class handles the internal map update for owner
 		saveClaims();
 	}
 

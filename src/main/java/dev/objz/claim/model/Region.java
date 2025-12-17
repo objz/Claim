@@ -11,7 +11,7 @@ public class Region {
 	private UUID owner;
 	private String name;
 	private final String worldName;
-	private final BoundingBox region;
+	private BoundingBox region;
 
 	private final Map<GlobalFlags, Boolean> globalFlags = new EnumMap<>(GlobalFlags.class);
 	private final Map<UUID, Roles> members = new HashMap<>();
@@ -47,9 +47,9 @@ public class Region {
 	}
 
 	public void setOwner(UUID owner) {
-		this.members.remove(this.owner); // Remove old owner role
+		this.members.remove(this.owner);
 		this.owner = owner;
-		this.members.put(owner, Roles.OWNER); // Set new owner role
+		this.members.put(owner, Roles.OWNER);
 	}
 
 	public String getName() {
@@ -62,6 +62,10 @@ public class Region {
 
 	public BoundingBox getRegion() {
 		return region;
+	}
+
+	public void resize(BoundingBox newRegion) {
+		this.region = newRegion;
 	}
 
 	public boolean contains(Location loc) {

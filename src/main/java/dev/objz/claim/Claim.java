@@ -2,7 +2,7 @@ package dev.objz.claim;
 
 import dev.objz.claim.command.ClaimCommands;
 import dev.objz.claim.gui.GuiManager;
-import dev.objz.claim.integration.ClaimBlueMap;
+import dev.objz.claim.integration.BlueMap;
 import dev.objz.claim.listener.*;
 import dev.objz.claim.manager.BypassManager;
 import dev.objz.claim.manager.ClaimManager;
@@ -22,7 +22,6 @@ public class Claim extends JavaPlugin {
 	private BypassManager bypassManager;
 	private Border borderVisualizer;
 	private GuiManager guiManager;
-	private ClaimBlueMap blueMapIntegration;
 
 	@Override
 	public void onEnable() {
@@ -38,14 +37,10 @@ public class Claim extends JavaPlugin {
 
 		new ClaimCommands(this).register();
 
+		new BlueMap(this);
+
 		registerListeners();
 
-		// Integrations
-		if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
-			getServer().getLogger().info("Enabling BlueMap integration");
-			this.blueMapIntegration = new ClaimBlueMap(this);
-			this.blueMapIntegration.enable();
-		}
 	}
 
 	private void registerListeners() {
@@ -63,9 +58,6 @@ public class Claim extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		if (blueMapIntegration != null) {
-			blueMapIntegration.disable();
-		}
 		if (borderVisualizer != null) {
 			borderVisualizer.cleanup();
 		}
