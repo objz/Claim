@@ -3,8 +3,7 @@ package dev.objz.claim.listener;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.PlayerFlags;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -19,6 +18,10 @@ public abstract class AbstractListener implements Listener {
 	}
 
 	protected boolean checkPermission(Player player, Location loc, PlayerFlags flag) {
+		if (plugin.getBypassManager().isBypassing(player)) {
+			return true;
+		}
+
 		Optional<Region> claimOpt = plugin.getClaimManager().getClaimAt(loc);
 		if (claimOpt.isEmpty())
 			return true;
@@ -28,6 +31,6 @@ public abstract class AbstractListener implements Listener {
 	}
 
 	protected void sendDenyMessage(Player player) {
-		player.sendActionBar(Component.text("You do not have permission to do that here", NamedTextColor.RED));
+		player.sendActionBar(MessageUtil.parse("<red>You do not have permission to do that here", false));
 	}
 }

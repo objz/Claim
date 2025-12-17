@@ -3,8 +3,7 @@ package dev.objz.claim.command.sub;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 
 import java.util.List;
 
@@ -23,23 +22,20 @@ public class ListCommand {
 							.toList();
 
 					if (claims.isEmpty()) {
-						player.sendMessage(Component.text("You do not own any claims",
-								NamedTextColor.YELLOW));
+						MessageUtil.sendInfo(player, "You do not own any claims.");
 						return;
 					}
 
-					player.sendMessage(Component.text("Your Claims:", NamedTextColor.GOLD));
+					MessageUtil.sendInfo(player, "Your Claims:");
 					for (Region claim : claims) {
 						int x = (int) claim.getRegion().getCenter().getX();
 						int z = (int) claim.getRegion().getCenter().getZ();
 
-						player.sendMessage(Component
-								.text("- " + claim.getName(), NamedTextColor.AQUA)
-								.append(Component.text(
-										" (" + x + ", " + z + " in "
-												+ claim.getWorldName()
-												+ ")",
-										NamedTextColor.GRAY)));
+						player.sendMessage(MessageUtil.parse(
+								" <dark_gray>-</dark_gray> <aqua>" + claim.getName()
+										+ "</aqua> <gray>(" + x + ", " + z
+										+ " in " + claim.getWorldName()
+										+ ")</gray>"));
 					}
 				});
 	}

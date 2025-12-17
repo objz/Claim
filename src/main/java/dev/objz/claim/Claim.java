@@ -6,6 +6,7 @@ import dev.objz.claim.command.ClaimCommands;
 import dev.objz.claim.gui.GuiManager;
 import dev.objz.claim.integration.ClaimBlueMap;
 import dev.objz.claim.listener.*;
+import dev.objz.claim.manager.BypassManager;
 import dev.objz.claim.manager.ClaimManager;
 import dev.objz.claim.manager.SelectionManager;
 import dev.objz.claim.util.HeadUtil;
@@ -20,25 +21,21 @@ public class Claim extends JavaPlugin {
 	private static Claim instance;
 	private ClaimManager claimManager;
 	private SelectionManager selectionManager;
+	private BypassManager bypassManager;
 	private Border borderVisualizer;
 	private GuiManager guiManager;
 	private ClaimBlueMap blueMapIntegration;
 
 	@Override
-	public void onLoad() {
-		CommandAPI.onLoad(new CommandAPIPaperConfig(this).verboseOutput(false));
-	}
-
-	@Override
 	public void onEnable() {
 		instance = this;
-		CommandAPI.onEnable();
 
 		HeadUtil.loadCache(new File(getDataFolder(), "head_cache.yml"));
 
 		this.borderVisualizer = new Border(this);
 		this.claimManager = new ClaimManager(this);
 		this.selectionManager = new SelectionManager(this);
+		this.bypassManager = new BypassManager();
 		this.guiManager = new GuiManager(this);
 
 		new ClaimCommands(this).register();
@@ -67,7 +64,6 @@ public class Claim extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		CommandAPI.onDisable();
 		if (blueMapIntegration != null) {
 			blueMapIntegration.disable();
 		}
@@ -90,6 +86,10 @@ public class Claim extends JavaPlugin {
 
 	public SelectionManager getSelectionManager() {
 		return selectionManager;
+	}
+
+	public BypassManager getBypassManager() {
+		return bypassManager;
 	}
 
 	public Border getBorderVisualizer() {

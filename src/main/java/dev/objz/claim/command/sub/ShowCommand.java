@@ -3,8 +3,7 @@ package dev.objz.claim.command.sub;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 
 import java.util.Optional;
 
@@ -20,8 +19,7 @@ public class ShowCommand {
 				.executesPlayer((player, args) -> {
 					if (plugin.getBorderVisualizer().isActive(player)) {
 						plugin.getBorderVisualizer().hideBorder(player);
-						player.sendMessage(Component.text("Claim borders hidden",
-								NamedTextColor.YELLOW));
+						MessageUtil.sendInfo(player, "Claim borders hidden.");
 						return;
 					}
 
@@ -31,12 +29,10 @@ public class ShowCommand {
 					if (claim.isPresent()) {
 						plugin.getBorderVisualizer().showBorder(player, claim.get().getRegion(),
 								claim.get().getWorldName());
-						player.sendMessage(Component.text(
-								"Claim borders shown.  Type /claim show to hide",
-								NamedTextColor.GREEN));
+						MessageUtil.sendSuccess(player,
+								"Claim borders shown. Type <yellow>/claim show</yellow> to hide.");
 					} else {
-						player.sendMessage(Component.text("No claim here to show",
-								NamedTextColor.RED));
+						MessageUtil.sendError(player, "No claim here to show.");
 					}
 				});
 	}

@@ -1,8 +1,7 @@
 package dev.objz.claim.manager;
 
 import dev.objz.claim.Claim;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,6 +24,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,7 +35,6 @@ public class SelectionManager implements Listener {
 	private final Map<UUID, Location> pos2 = new HashMap<>();
 
 	private static final Material TOOL_MATERIAL = Material.GOLDEN_SHOVEL;
-	private static final Component TOOL_NAME = Component.text("Claim Tool", NamedTextColor.GOLD);
 	private static final String TOOL_KEY_NAME = "claim_tool";
 
 	public SelectionManager(Claim plugin) {
@@ -90,10 +89,10 @@ public class SelectionManager implements Listener {
 	private void giveTool(Player player) {
 		ItemStack tool = new ItemStack(TOOL_MATERIAL);
 		ItemMeta meta = tool.getItemMeta();
-		meta.displayName(TOOL_NAME);
-		meta.lore(java.util.List.of(
-				Component.text("Left-Click: Set Position 1", NamedTextColor.YELLOW),
-				Component.text("Right-Click: Set Position 2", NamedTextColor.YELLOW)));
+		meta.displayName(MessageUtil.parse("<gold>Claim Tool</gold>", false));
+		meta.lore(List.of(
+				MessageUtil.parse("<yellow>Left-Click:</yellow> <gray>Set Position 1</gray>", false),
+				MessageUtil.parse("<yellow>Right-Click:</yellow> <gray>Set Position 2</gray>", false)));
 
 		meta.addEnchant(Enchantment.UNBREAKING, 1, true);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -105,7 +104,7 @@ public class SelectionManager implements Listener {
 		tool.setItemMeta(meta);
 		player.getInventory().addItem(tool);
 
-		player.sendMessage(Component.text("Left/Right click to select corners", NamedTextColor.GREEN));
+		MessageUtil.sendInfo(player, "Left/Right click to select corners.");
 	}
 
 	private boolean isTool(ItemStack item) {
@@ -168,14 +167,14 @@ public class SelectionManager implements Listener {
 		RayTraceResult result = player.rayTraceBlocks(100, FluidCollisionMode.NEVER);
 
 		if (result == null || result.getHitBlock() == null) {
-			player.sendMessage(Component.text("You must look at a block to select it", NamedTextColor.RED));
+			MessageUtil.sendError(player, "You must look at a block to select it.");
 			return;
 		}
 
 		Location target = result.getHitBlock().getLocation();
 
 		if (plugin.getClaimManager().getClaimAt(target).isPresent()) {
-			player.sendMessage(Component.text("You cannot set a claim corner inside an existing claim", NamedTextColor.RED));
+			MessageUtil.sendError(player, "You cannot set a claim corner inside an existing claim.");
 			return;
 		}
 
@@ -185,22 +184,22 @@ public class SelectionManager implements Listener {
 
 			if (isSelectionOverlapping(player)) {
 				if (oldPos != null) pos1.put(player.getUniqueId(), oldPos); else pos1.remove(player.getUniqueId());
-				player.sendMessage(Component.text("You cannot create a selection that overlaps with an existing claim.", NamedTextColor.RED));
+				MessageUtil.sendError(player, "You cannot create a selection that overlaps with an existing claim.");
 				return;
 			}
 
-			player.sendMessage(Component.text("Position 1 set at " + formatLoc(target), NamedTextColor.GREEN));
+			MessageUtil.sendInfo(player, "Position 1 set at <yellow>" + formatLoc(target) + "</yellow>");
 		} else if (isRightClick) {
 			Location oldPos = pos2.get(player.getUniqueId());
 			pos2.put(player.getUniqueId(), target);
 
 			if (isSelectionOverlapping(player)) {
 				if (oldPos != null) pos2.put(player.getUniqueId(), oldPos); else pos2.remove(player.getUniqueId());
-				player.sendMessage(Component.text("You cannot create a selection that overlaps with an existing claim.", NamedTextColor.RED));
+				MessageUtil.sendError(player, "You cannot create a selection that overlaps with an existing claim.");
 				return;
 			}
 
-			player.sendMessage(Component.text("Position 2 set at " + formatLoc(target), NamedTextColor.GREEN));
+			MessageUtil.sendInfo(player, "Position 2 set at <yellow>" + formatLoc(target) + "</yellow>");
 		}
 
 		player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 2.0f);

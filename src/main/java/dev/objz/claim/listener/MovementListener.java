@@ -2,8 +2,7 @@ package dev.objz.claim.listener;
 
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -26,10 +25,11 @@ public class MovementListener extends AbstractListener {
 
 		if (to.isPresent() && (from.isEmpty() || !from.get().getId().equals(to.get().getId()))) {
 			event.getPlayer().sendActionBar(
-					Component.text("Entered " + to.get().getName(), NamedTextColor.AQUA));
+					MessageUtil.parse("<gradient:#00aaff:#00ffaa>Entered " + to.get().getName()
+							+ "</gradient>"));
 		} else if (from.isPresent() && to.isEmpty()) {
 			event.getPlayer().sendActionBar(
-					Component.text("Left " + from.get().getName(), NamedTextColor.YELLOW));
+					MessageUtil.parse("<yellow>Left " + from.get().getName()));
 		}
 	}
 }

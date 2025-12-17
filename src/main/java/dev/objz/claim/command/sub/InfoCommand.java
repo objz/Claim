@@ -1,11 +1,12 @@
 package dev.objz.claim.command.sub;
 
+import dev.jorel.commandapi.executors.CommandArguments;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import dev.jorel.commandapi.executors.CommandArguments;
 
 import java.util.Optional;
 
@@ -23,13 +24,14 @@ public class InfoCommand {
 			if (claim.get().getOwner().equals(player.getUniqueId()) || player.isOp()) {
 				plugin.getGuiManager().openMainMenu(player, claim.get());
 			} else {
-				player.sendMessage(Component.text("You are in claim: " + claim.get().getName(),
-						NamedTextColor.AQUA));
-				player.sendMessage(Component.text("Owner: " + claim.get().getOwner(),
-						NamedTextColor.GRAY));
+				OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.get().getOwner());
+				MessageUtil.sendInfo(player,
+						"You are in claim: <yellow>" + claim.get().getName() + "</yellow>");
+				MessageUtil.sendInfo(player, "Owner: <white>"
+						+ (owner.getName() != null ? owner.getName() : "Unknown") + "</white>");
 			}
 		} else {
-			player.sendMessage(Component.text("No claim at this location", NamedTextColor.YELLOW));
+			MessageUtil.sendError(player, "No claim at this location.");
 		}
 	}
 }

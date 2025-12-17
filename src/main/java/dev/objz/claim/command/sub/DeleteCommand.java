@@ -1,12 +1,11 @@
-package dev.objz.claim.command. sub;
+package dev.objz.claim.command.sub;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel. commandapi.arguments.StringArgument;
-import dev.objz. claim.Claim;
+import dev.jorel.commandapi.arguments.StringArgument;
+import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
-import net.kyori.adventure.text. Component;
-import net.kyori.adventure.text.format. NamedTextColor;
+import dev.objz.claim.util.MessageUtil;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -24,7 +23,8 @@ public class DeleteCommand {
 						.replaceSuggestions(ArgumentSuggestions.strings(info -> {
 							if (info.sender() instanceof Player player) {
 								return plugin.getClaimManager().getAllClaims().stream()
-										.filter(c -> c.getOwner().equals(player.getUniqueId()))
+										.filter(c -> c.getOwner().equals(
+												player.getUniqueId()))
 										.map(Region::getName)
 										.toArray(String[]::new);
 							}
@@ -36,34 +36,43 @@ public class DeleteCommand {
 					Region targetClaim = null;
 
 					if (name != null) {
-						Optional<Region> namedClaim = plugin.getClaimManager().getAllClaims().stream()
-								.filter(c -> c.getOwner().equals(player.getUniqueId()) && c.getName().equalsIgnoreCase(name))
+						Optional<Region> namedClaim = plugin.getClaimManager().getAllClaims()
+								.stream()
+								.filter(c -> c.getOwner().equals(player.getUniqueId())
+										&& c.getName().equalsIgnoreCase(name))
 								.findFirst();
 
 						if (namedClaim.isEmpty()) {
-							player.sendMessage(Component.text("You do not own a claim named '" + name + "'", NamedTextColor. RED));
+							MessageUtil.sendError(player,
+									"You do not own a claim named '<yellow>" + name
+											+ "</yellow>'.");
 							return;
 						}
 						targetClaim = namedClaim.get();
 					} else {
-						Optional<Region> locClaim = plugin.getClaimManager().getClaimAt(player.getLocation());
+						Optional<Region> locClaim = plugin.getClaimManager()
+								.getClaimAt(player.getLocation());
 
 						if (locClaim.isEmpty()) {
-							player.sendMessage(Component.text("You are not standing in a claim", NamedTextColor.RED));
+							MessageUtil.sendError(player,
+									"You are not standing in a claim.");
 							return;
 						}
 
-						if (! locClaim.get().getOwner().equals(player.getUniqueId()) && !player.isOp()) {
-							player.sendMessage(Component.text("You do not have permission to delete this claim", NamedTextColor.RED));
+						if (!locClaim.get().getOwner().equals(player.getUniqueId())
+								&& !player.isOp()) {
+							MessageUtil.sendError(player,
+									"You do not have permission to delete this claim.");
 							return;
 						}
 						targetClaim = locClaim.get();
 					}
 
-					plugin. getClaimManager().deleteClaim(targetClaim.getId());
+					plugin.getClaimManager().deleteClaim(targetClaim.getId());
 					plugin.getBorderVisualizer().hideBorder(player);
 
-					player.sendMessage(Component. text("Claim '" + targetClaim.getName() + "' has been deleted", NamedTextColor.GREEN));
+					MessageUtil.sendSuccess(player, "Claim '<yellow>" + targetClaim.getName()
+							+ "</yellow>' has been deleted.");
 				});
 	}
 }

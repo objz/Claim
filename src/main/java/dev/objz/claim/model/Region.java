@@ -8,7 +8,7 @@ import java.util.*;
 public class Region {
 
 	private final UUID id;
-	private final UUID owner;
+	private UUID owner;
 	private String name;
 	private final String worldName;
 	private final BoundingBox region;
@@ -44,6 +44,12 @@ public class Region {
 
 	public UUID getOwner() {
 		return owner;
+	}
+
+	public void setOwner(UUID owner) {
+		this.members.remove(this.owner); // Remove old owner role
+		this.owner = owner;
+		this.members.put(owner, Roles.OWNER); // Set new owner role
 	}
 
 	public String getName() {

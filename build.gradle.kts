@@ -20,5 +20,6 @@ dependencies {
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
     compileOnly("de.bluecolored:bluemap-api:2.7.7")
     compileOnly("dev.jorel:commandapi-paper-core:11.1.0")
+    implementation("net.kyori:adventure-text-minimessage:4.25.0")
 }
 
