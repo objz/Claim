@@ -100,7 +100,8 @@ public class HeadUtil {
 	}
 
 	private static void applyTexture(SkullMeta meta, String base64) {
-		PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), null);
+		UUID uuid = UUID.nameUUIDFromBytes(base64.getBytes());
+		PlayerProfile profile = Bukkit.createProfile(uuid, "custom_head");
 		profile.setProperty(new ProfileProperty("textures", base64));
 		meta.setPlayerProfile(profile);
 	}

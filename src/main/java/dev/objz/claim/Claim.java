@@ -22,6 +22,7 @@ public class Claim extends JavaPlugin {
 	private BypassManager bypassManager;
 	private Border borderVisualizer;
 	private GuiManager guiManager;
+	private BlueMap blueMap;
 
 	@Override
 	public void onEnable() {
@@ -37,7 +38,8 @@ public class Claim extends JavaPlugin {
 
 		new ClaimCommands(this).register();
 
-		new BlueMap(this);
+		this.blueMap = new BlueMap(this);
+		this.blueMap.enable();
 
 		registerListeners();
 
@@ -63,6 +65,9 @@ public class Claim extends JavaPlugin {
 		}
 		if (claimManager != null) {
 			claimManager.saveClaims();
+		}
+		if (blueMap != null) {
+			blueMap.disable();
 		}
 		HeadUtil.saveCache(new File(getDataFolder(), "head_cache.yml"));
 	}

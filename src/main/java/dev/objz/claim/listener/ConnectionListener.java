@@ -16,6 +16,11 @@ public class ConnectionListener extends AbstractListener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		PlayerProfile profile = event.getPlayer().getPlayerProfile();
+		
+		if (!profile.hasProperty("textures")) {
+			profile.complete(false); 
+		}
+
 		for (ProfileProperty property : profile.getProperties()) {
 			if ("textures".equals(property.getName())) {
 				HeadUtil.cacheTexture(event.getPlayer().getUniqueId(), property.getValue());

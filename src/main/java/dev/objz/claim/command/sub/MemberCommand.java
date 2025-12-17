@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
 import dev.objz.claim.model.Roles;
@@ -56,7 +57,7 @@ public class MemberCommand {
 
 	private CommandAPICommand getRemoveCommand() {
 		return new CommandAPICommand("remove")
-				.withArguments(new MultiLiteralArgument("member_name")
+				.withArguments(new StringArgument("member_name")
 						.replaceSuggestions(ArgumentSuggestions.strings(info -> {
 							if (info.sender() instanceof Player p) {
 								Optional<Region> claim = plugin.getClaimManager()
@@ -81,7 +82,6 @@ public class MemberCommand {
 					if (claim == null)
 						return;
 
-					// Find UUID from name in members list
 					UUID targetUUID = null;
 					for (UUID uuid : claim.getMembers().keySet()) {
 						String name = Bukkit.getOfflinePlayer(uuid).getName();
@@ -92,7 +92,7 @@ public class MemberCommand {
 					}
 
 					if (targetUUID == null) {
-						MessageUtil.sendError(player, "Member not found in this claim.");
+						MessageUtil.sendError(player, "Member not found in this claim");
 						return;
 					}
 
@@ -101,7 +101,7 @@ public class MemberCommand {
 						return;
 					}
 
-					claim.setRole(targetUUID, null); // Removes them
+					claim.setRole(targetUUID, null);
 					plugin.getClaimManager().saveClaims();
 					MessageUtil.sendSuccess(player, "Removed " + targetName + " from claim");
 				});
@@ -109,7 +109,7 @@ public class MemberCommand {
 
 	private CommandAPICommand getSetRoleCommand() {
 		return new CommandAPICommand("role")
-				.withArguments(new MultiLiteralArgument("member_name")
+				.withArguments(new StringArgument("member_name")
 						.replaceSuggestions(ArgumentSuggestions.strings(info -> {
 							if (info.sender() instanceof Player p) {
 								Optional<Region> claim = plugin.getClaimManager()
@@ -138,7 +138,6 @@ public class MemberCommand {
 					if (claim == null)
 						return;
 
-					// Find UUID from name in members list
 					UUID targetUUID = null;
 					for (UUID uuid : claim.getMembers().keySet()) {
 						String name = Bukkit.getOfflinePlayer(uuid).getName();
@@ -149,7 +148,7 @@ public class MemberCommand {
 					}
 
 					if (targetUUID == null) {
-						MessageUtil.sendError(player, "Member not found in this claim.");
+						MessageUtil.sendError(player, "Member not found in this claim");
 						return;
 					}
 

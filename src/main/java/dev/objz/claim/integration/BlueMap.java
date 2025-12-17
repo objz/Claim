@@ -30,7 +30,9 @@ public class BlueMap {
 	}
 
 	public void enable() {
-		BlueMapAPI.onEnable(this::onBlueMapEnable);
+		if (Bukkit.getPluginManager().isPluginEnabled("BlueMap")) {
+			BlueMapAPI.getInstance().ifPresent(this::onBlueMapEnable);
+		}
 	}
 
 	public void disable() {
@@ -40,20 +42,21 @@ public class BlueMap {
 	private void onBlueMapEnable(BlueMapAPI api) {
 		plugin.getLogger().info("BlueMap API detected. Enabling integration...");
 		markerSets.clear();
-		// Initial load of all claims
 		for (Region claim : plugin.getClaimManager().getAllClaims()) {
 			updateClaim(claim);
 		}
 	}
 
 	public void updateClaim(Region claim) {
+		if (!Bukkit.getPluginManager().isPluginEnabled("BlueMap"))
+			return;
+
 		BlueMapAPI.getInstance().ifPresent(api -> {
 			World bukkitWorld = Bukkit.getWorld(claim.getWorldName());
 			if (bukkitWorld == null)
 				return;
 
 			api.getWorld(bukkitWorld).ifPresent(world -> {
-				// Get or create MarkerSet for this world
 				MarkerSet set = markerSets.computeIfAbsent(claim.getWorldName(), k -> {
 					MarkerSet newSet = MarkerSet.builder()
 							.label(MARKER_SET_LABEL)
@@ -67,9 +70,6 @@ public class BlueMap {
 
 				BoundingBox box = claim.getRegion();
 
-				// Create shape from BoundingBox
-				// Note: Region BoundingBox is already expanded to full block coordinates (e.g.
-				// x.0 to x+1.0)
 				Vector2d p1 = new Vector2d(box.getMinX(), box.getMinZ());
 				Vector2d p2 = new Vector2d(box.getMaxX(), box.getMinZ());
 				Vector2d p3 = new Vector2d(box.getMaxX(), box.getMaxZ());
@@ -99,6 +99,9 @@ public class BlueMap {
 	}
 
 	public void removeClaim(UUID claimId) {
+		if (!Bukkit.getPluginManager().isPluginEnabled("BlueMap"))
+			return;
+
 		BlueMapAPI.getInstance().ifPresent(api -> {
 			for (MarkerSet set : markerSets.values()) {
 				set.getMarkers().remove(claimId.toString());
@@ -106,7 +109,6 @@ public class BlueMap {
 		});
 	}
 
-	// Compute a saturated, bright color for the owner's line (alpha = 1.0f)
 	private Color computeLineColor(UUID owner) {
 		float hue = deterministicHue(owner);
 		int rgb = java.awt.Color.HSBtoRGB(hue, 0.75f, 0.9f);
@@ -116,7 +118,6 @@ public class BlueMap {
 		return new Color(r, g, b, 1.0f);
 	}
 
-	// Compute fill color with reduced alpha
 	private Color computeFillColor(UUID owner) {
 		float hue = deterministicHue(owner);
 		int rgb = java.awt.Color.HSBtoRGB(hue, 0.75f, 0.95f);
@@ -126,7 +127,6 @@ public class BlueMap {
 		return new Color(r, g, b, 0.25f);
 	}
 
-	// Produce a deterministic hue in [0,1) from the owner's UUID
 	private float deterministicHue(UUID owner) {
 		long bits = owner.getMostSignificantBits() ^ owner.getLeastSignificantBits();
 		int h = (int) (Math.abs(bits % 360L));
