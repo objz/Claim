@@ -104,7 +104,7 @@ public class SelectionManager implements Listener {
 		tool.setItemMeta(meta);
 		player.getInventory().addItem(tool);
 
-		MessageUtil.sendInfo(player, "Left/Right click to select corners.");
+		MessageUtil.sendInfo(player, "Left/Right click to select corners");
 	}
 
 	private boolean isTool(ItemStack item) {
@@ -167,14 +167,14 @@ public class SelectionManager implements Listener {
 		RayTraceResult result = player.rayTraceBlocks(100, FluidCollisionMode.NEVER);
 
 		if (result == null || result.getHitBlock() == null) {
-			MessageUtil.sendError(player, "You must look at a block to select it.");
+			MessageUtil.sendError(player, "You must look at a block to select it");
 			return;
 		}
 
 		Location target = result.getHitBlock().getLocation();
 
 		if (plugin.getClaimManager().getClaimAt(target).isPresent()) {
-			MessageUtil.sendError(player, "You cannot set a claim corner inside an existing claim.");
+			MessageUtil.sendError(player, "You cannot set a claim corner inside an existing claim");
 			return;
 		}
 
@@ -183,8 +183,12 @@ public class SelectionManager implements Listener {
 			pos1.put(player.getUniqueId(), target);
 
 			if (isSelectionOverlapping(player)) {
-				if (oldPos != null) pos1.put(player.getUniqueId(), oldPos); else pos1.remove(player.getUniqueId());
-				MessageUtil.sendError(player, "You cannot create a selection that overlaps with an existing claim.");
+				if (oldPos != null)
+					pos1.put(player.getUniqueId(), oldPos);
+				else
+					pos1.remove(player.getUniqueId());
+				MessageUtil.sendError(player,
+						"You cannot create a selection that overlaps with an existing claim");
 				return;
 			}
 
@@ -194,8 +198,12 @@ public class SelectionManager implements Listener {
 			pos2.put(player.getUniqueId(), target);
 
 			if (isSelectionOverlapping(player)) {
-				if (oldPos != null) pos2.put(player.getUniqueId(), oldPos); else pos2.remove(player.getUniqueId());
-				MessageUtil.sendError(player, "You cannot create a selection that overlaps with an existing claim.");
+				if (oldPos != null)
+					pos2.put(player.getUniqueId(), oldPos);
+				else
+					pos2.remove(player.getUniqueId());
+				MessageUtil.sendError(player,
+						"You cannot create a selection that overlaps with an existing claim");
 				return;
 			}
 
@@ -207,12 +215,14 @@ public class SelectionManager implements Listener {
 	}
 
 	private boolean isSelectionOverlapping(Player player) {
-		if (!hasSelection(player)) return false;
+		if (!hasSelection(player))
+			return false;
 
 		Location p1 = pos1.get(player.getUniqueId());
 		Location p2 = pos2.get(player.getUniqueId());
 
-		if (!p1.getWorld().equals(p2.getWorld())) return false;
+		if (!p1.getWorld().equals(p2.getWorld()))
+			return false;
 
 		int minX = Math.min(p1.getBlockX(), p2.getBlockX());
 		int minZ = Math.min(p1.getBlockZ(), p2.getBlockZ());

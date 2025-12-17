@@ -31,7 +31,7 @@ public class InfoCommand {
 						+ (owner.getName() != null ? owner.getName() : "Unknown") + "</white>");
 			}
 		} else {
-			MessageUtil.sendError(player, "No claim at this location.");
+			MessageUtil.sendError(player, "No claim at this location");
 		}
 	}
 }

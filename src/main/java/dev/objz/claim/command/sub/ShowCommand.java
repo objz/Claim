@@ -19,7 +19,7 @@ public class ShowCommand {
 				.executesPlayer((player, args) -> {
 					if (plugin.getBorderVisualizer().isActive(player)) {
 						plugin.getBorderVisualizer().hideBorder(player);
-						MessageUtil.sendInfo(player, "Claim borders hidden.");
+						MessageUtil.sendInfo(player, "Claim borders hidden");
 						return;
 					}
 
@@ -30,9 +30,9 @@ public class ShowCommand {
 						plugin.getBorderVisualizer().showBorder(player, claim.get().getRegion(),
 								claim.get().getWorldName());
 						MessageUtil.sendSuccess(player,
-								"Claim borders shown. Type <yellow>/claim show</yellow> to hide.");
+								"Claim borders shown. Type <yellow>/claim show</yellow> to hide");
 					} else {
-						MessageUtil.sendError(player, "No claim here to show.");
+						MessageUtil.sendError(player, "No claim here to show");
 					}
 				});
 	}

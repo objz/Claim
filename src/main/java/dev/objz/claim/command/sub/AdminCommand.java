@@ -84,7 +84,7 @@ public class AdminCommand {
 								+ Bukkit.getOfflinePlayer(target.get().getOwner())
 										.getName());
 					} else {
-						MessageUtil.sendError(player, "Claim not found.");
+						MessageUtil.sendError(player, "Claim not found");
 					}
 				});
 	}
@@ -95,9 +95,9 @@ public class AdminCommand {
 					boolean state = plugin.getBypassManager().toggleBypass(player);
 					if (state) {
 						MessageUtil.sendSuccess(player,
-								"Admin bypass <green>ENABLED</green>. You can now interact with all claims.");
+								"Admin bypass <green>ENABLED</green>. You can now interact with all claims");
 					} else {
-						MessageUtil.sendInfo(player, "Admin bypass <red>DISABLED</red>.");
+						MessageUtil.sendInfo(player, "Admin bypass <red>DISABLED</red>");
 					}
 				});
 	}
@@ -114,14 +114,14 @@ public class AdminCommand {
 							.getClaimAt(player.getLocation());
 					if (claim.isEmpty()) {
 						MessageUtil.sendError(player,
-								"You must be standing in a claim to transfer it.");
+								"You must be standing in a claim to transfer it");
 						return;
 					}
 
 					Region region = claim.get();
 					plugin.getClaimManager().transferClaim(region, newOwner.getUniqueId());
 					MessageUtil.sendSuccess(player, "Transferred claim <yellow>" + region.getName()
-							+ "</yellow> to <aqua>" + newOwner.getName() + "</aqua>.");
+							+ "</yellow> to <aqua>" + newOwner.getName() + "</aqua>");
 				});
 	}
 }

@@ -31,6 +31,6 @@ public abstract class AbstractListener implements Listener {
 	}
 
 	protected void sendDenyMessage(Player player) {
-		player.sendActionBar(MessageUtil.parse("<gradient:#ff5555:#ff0000><bold>✘ You do not have permission to do that here</bold></gradient>", false));
+		player.sendActionBar(MessageUtil.parse("<gradient:#ff0000:#ff5555><bold>You do not have permission to do that here</bold></gradient>", false));
 	}
 }

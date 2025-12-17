@@ -22,7 +22,7 @@ public class ListCommand {
 							.toList();
 
 					if (claims.isEmpty()) {
-						MessageUtil.sendInfo(player, "You do not own any claims.");
+						MessageUtil.sendInfo(player, "You do not own any claims");
 						return;
 					}
 

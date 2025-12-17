@@ -45,7 +45,7 @@ public class DeleteCommand {
 						if (namedClaim.isEmpty()) {
 							MessageUtil.sendError(player,
 									"You do not own a claim named '<yellow>" + name
-											+ "</yellow>'.");
+											+ "</yellow>'");
 							return;
 						}
 						targetClaim = namedClaim.get();
@@ -55,14 +55,14 @@ public class DeleteCommand {
 
 						if (locClaim.isEmpty()) {
 							MessageUtil.sendError(player,
-									"You are not standing in a claim.");
+									"You are not standing in a claim");
 							return;
 						}
 
 						if (!locClaim.get().getOwner().equals(player.getUniqueId())
 								&& !player.isOp()) {
 							MessageUtil.sendError(player,
-									"You do not have permission to delete this claim.");
+									"You do not have permission to delete this claim");
 							return;
 						}
 						targetClaim = locClaim.get();
@@ -72,7 +72,7 @@ public class DeleteCommand {
 					plugin.getBorderVisualizer().hideBorder(player);
 
 					MessageUtil.sendSuccess(player, "Claim '<yellow>" + targetClaim.getName()
-							+ "</yellow>' has been deleted.");
+							+ "</yellow>' has been deleted");
 				});
 	}
 }

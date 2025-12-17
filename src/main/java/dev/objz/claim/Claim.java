@@ -1,7 +1,5 @@
 package dev.objz.claim;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPIPaperConfig;
 import dev.objz.claim.command.ClaimCommands;
 import dev.objz.claim.gui.GuiManager;
 import dev.objz.claim.integration.ClaimBlueMap;
