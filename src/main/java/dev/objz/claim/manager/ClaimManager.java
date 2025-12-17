@@ -42,7 +42,16 @@ public class ClaimManager {
 		Location lower = new Location(pos1.getWorld(), minX, minY, minZ);
 		Location upper = new Location(pos1.getWorld(), maxX, maxY, maxZ);
 
-		Region claim = new Region(owner, name, lower, upper);
+		int markerY;
+		try {
+			int cx = (int) ((minX + maxX) / 2);
+			int cz = (int) ((minZ + maxZ) / 2);
+			markerY = pos1.getWorld().getHighestBlockYAt(cx, cz) + 1;
+		} catch (Throwable t) {
+			markerY = (int) Math.max(pos1.getY(), pos2.getY()) + 2;
+		}
+
+		Region claim = new Region(owner, name, lower, upper, markerY);
 		claims.put(claim.getId(), claim);
 		saveClaims();
 
@@ -122,6 +131,9 @@ public class ClaimManager {
 			config.set(path + ".maxY", claim.getRegion().getMaxY());
 			config.set(path + ".maxZ", claim.getRegion().getMaxZ());
 
+			// Save the calculated Y coordinate
+			config.set(path + ".markerY", claim.getMarkerY());
+
 			for (GlobalFlags flag : GlobalFlags.values()) {
 				config.set(path + ".globalFlags." + flag.name(), claim.getFlag(flag));
 			}
@@ -177,13 +189,15 @@ public class ClaimManager {
 				double maxY = config.getDouble(path + ".maxY");
 				double maxZ = config.getDouble(path + ".maxZ");
 
+				int markerY = config.getInt(path + ".markerY", (int) minY + 50);
+
 				if (Bukkit.getWorld(world) == null)
 					continue;
 
 				Location p1 = new Location(Bukkit.getWorld(world), minX, minY, minZ);
 				Location p2 = new Location(Bukkit.getWorld(world), maxX, maxY, maxZ);
 
-				Region claim = new Region(owner, name, p1, p2);
+				Region claim = new Region(owner, name, p1, p2, markerY);
 
 				if (config.contains(path + ".globalFlags")) {
 					for (String flagName : config.getConfigurationSection(path + ".globalFlags")

@@ -15,4 +15,3 @@ dependencies:
     BlueMap:
       load: BEFORE
       required: false
-      join-classpath: true

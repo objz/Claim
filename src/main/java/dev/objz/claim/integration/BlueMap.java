@@ -82,10 +82,8 @@ public class BlueMap {
 
 				Color lineColor = computeLineColor(claim.getOwner());
 				Color fillColor = computeFillColor(claim.getOwner());
-				
-				int centerX = (int) box.getCenterX();
-				int centerZ = (int) box.getCenterZ();
-				int surfaceY = bukkitWorld.getHighestBlockYAt(centerX, centerZ) + 1;
+
+				int surfaceY = claim.getMarkerY();
 
 				ShapeMarker marker = ShapeMarker.builder()
 						.shape(shape, (float) surfaceY)

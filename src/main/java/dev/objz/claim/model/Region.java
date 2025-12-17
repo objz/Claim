@@ -12,17 +12,19 @@ public class Region {
 	private String name;
 	private final String worldName;
 	private BoundingBox region;
+	private final int markerY;
 
 	private final Map<GlobalFlags, Boolean> globalFlags = new EnumMap<>(GlobalFlags.class);
 	private final Map<UUID, Roles> members = new HashMap<>();
 	private final Map<Roles, Map<PlayerFlags, Boolean>> rolePermissions = new EnumMap<>(Roles.class);
 	private final Map<UUID, Map<PlayerFlags, Boolean>> playerFlagOverrides = new HashMap<>();
 
-	public Region(UUID owner, String name, Location pos1, Location pos2) {
+	public Region(UUID owner, String name, Location pos1, Location pos2, int markerY) {
 		this.id = UUID.randomUUID();
 		this.owner = owner;
 		this.name = name;
 		this.worldName = pos1.getWorld().getName();
+		this.markerY = markerY;
 
 		int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
 		int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
@@ -66,6 +68,10 @@ public class Region {
 
 	public BoundingBox getRegion() {
 		return region;
+	}
+
+	public int getMarkerY() {
+		return markerY;
 	}
 
 	public void resize(BoundingBox newRegion) {
