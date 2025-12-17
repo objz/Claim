@@ -8,7 +8,6 @@ import com.comphenix.protocol.wrappers.BukkitConverters;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import dev.objz.claim.Claim;
-import dev.objz.claim.model.ClaimRegion;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,13 +25,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BorderVisualizer {
+public class Border {
 
 	private final Claim plugin;
 	private final ProtocolManager protocolManager;
-
 	private final Map<UUID, VisualizationData> activeVisuals = new ConcurrentHashMap<>();
-
 	private final AtomicInteger entityIdCounter = new AtomicInteger(Integer.MAX_VALUE - 1000000);
 
 	private static final int VERTICAL_SPACING = 1;
@@ -41,48 +38,19 @@ public class BorderVisualizer {
 	private static final float ITEM_SCALE = 0.5f;
 	private static final long UPDATE_INTERVAL_TICKS = 10L;
 
-	public BorderVisualizer(Claim plugin) {
+	public Border(Claim plugin) {
 		this.plugin = plugin;
 		this.protocolManager = ProtocolLibrary.getProtocolManager();
 	}
 
-	public boolean isVisualizing(Player player) {
-		return activeVisuals.containsKey(player.getUniqueId());
-	}
-
-	public void showSelectionBorder(Player player, BoundingBox box) {
-		resetBorder(player);
-
-		VisualizationData data = new VisualizationData(box, player.getWorld().getName(), true);
+	public void showBorder(Player player, BoundingBox box, String worldName) {
+		hideBorder(player);
+		VisualizationData data = new VisualizationData(box, worldName);
 		activeVisuals.put(player.getUniqueId(), data);
-
 		startUpdateTask(player, data);
 	}
 
-	public void showClaimBorder(Player player, ClaimRegion claim) {
-		resetBorder(player);
-
-		VisualizationData data = new VisualizationData(claim.getRegion(), claim.getWorldName(), false);
-		activeVisuals.put(player.getUniqueId(), data);
-
-		startUpdateTask(player, data);
-	}
-
-	public void showClaimBorder(Player player, ClaimRegion claim, int seconds) {
-		showClaimBorder(player, claim);
-
-		if (seconds > 0) {
-			Bukkit.getGlobalRegionScheduler().runDelayed(plugin, (task) -> {
-				resetBorder(player);
-			}, seconds * 20L);
-		}
-	}
-
-	public void stopVisual(Player player) {
-		resetBorder(player);
-	}
-
-	public void resetBorder(Player player) {
+	public void hideBorder(Player player) {
 		VisualizationData data = activeVisuals.remove(player.getUniqueId());
 		if (data == null)
 			return;
@@ -93,6 +61,20 @@ public class BorderVisualizer {
 
 		destroyEntities(player, data.spawnedEntityIds);
 		data.spawnedEntityIds.clear();
+	}
+
+	public boolean isActive(Player player) {
+		return activeVisuals.containsKey(player.getUniqueId());
+	}
+
+	public void cleanup() {
+		for (Map.Entry<UUID, VisualizationData> entry : activeVisuals.entrySet()) {
+			Player player = Bukkit.getPlayer(entry.getKey());
+			if (player != null && player.isOnline()) {
+				hideBorder(player);
+			}
+		}
+		activeVisuals.clear();
 	}
 
 	private void startUpdateTask(Player player, VisualizationData data) {
@@ -143,7 +125,7 @@ public class BorderVisualizer {
 
 		for (MarkerPosition pos : toAdd) {
 			int entityId = entityIdCounter.getAndDecrement();
-			spawnMarkerEntity(player, pos, entityId, data.isSelection);
+			spawnMarkerEntity(player, pos, entityId);
 			data.markerToEntityId.put(pos, entityId);
 			data.spawnedEntityIds.add(entityId);
 		}
@@ -170,7 +152,6 @@ public class BorderVisualizer {
 		java.util.function.Predicate<MarkerPosition> isVisible = (pos) -> {
 			if ((pos.x + pos.y + pos.z) % 2 == 0)
 				return false;
-
 			Block block = world.getBlockAt(pos.x, pos.y, pos.z);
 			return !block.getType().isOccluding();
 		};
@@ -230,7 +211,7 @@ public class BorderVisualizer {
 		return Math.abs(x - playerX) <= range && Math.abs(z - playerZ) <= range;
 	}
 
-	private void spawnMarkerEntity(Player player, MarkerPosition pos, int entityId, boolean isSelection) {
+	private void spawnMarkerEntity(Player player, MarkerPosition pos, int entityId) {
 		try {
 			PacketContainer spawnPacket = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY);
 
@@ -240,45 +221,43 @@ public class BorderVisualizer {
 			spawnPacket.getUUIDs().write(0, entityUUID);
 			spawnPacket.getEntityTypeModifier().write(0, EntityType.ITEM_DISPLAY);
 
-			// Position
 			double x = pos.x + 0.5;
 			double y = pos.y + 0.5;
 			double z = pos.z + 0.5;
 
 			float yaw = 0;
 			switch (pos.side) {
-				case NORTH -> yaw = 0; // Facing South (Z+)
-				case SOUTH -> yaw = 180; // Facing North (Z-)
-				case WEST -> yaw = 90; // Facing East (X+)
-				case EAST -> yaw = 270; // Facing West (X-)
+				case NORTH -> yaw = 0;
+				case SOUTH -> yaw = 180;
+				case WEST -> yaw = 90;
+				case EAST -> yaw = 270;
 			}
 
 			byte yawByte = (byte) (yaw * 256.0F / 360.0F);
 
-			spawnPacket.getDoubles().write(0, x); // X
-			spawnPacket.getDoubles().write(1, y); // Y
-			spawnPacket.getDoubles().write(2, z); // Z
+			spawnPacket.getDoubles().write(0, x);
+			spawnPacket.getDoubles().write(1, y);
+			spawnPacket.getDoubles().write(2, z);
 
-			spawnPacket.getIntegers().write(1, 0); // Velocity X
-			spawnPacket.getIntegers().write(2, 0); // Velocity Y
-			spawnPacket.getIntegers().write(3, 0); // Velocity Z
+			spawnPacket.getIntegers().write(1, 0);
+			spawnPacket.getIntegers().write(2, 0);
+			spawnPacket.getIntegers().write(3, 0);
 
-			spawnPacket.getBytes().write(0, (byte) 0); // Pitch
-			spawnPacket.getBytes().write(1, yawByte); // Yaw
-			spawnPacket.getBytes().write(2, yawByte); // Head Yaw
+			spawnPacket.getBytes().write(0, (byte) 0);
+			spawnPacket.getBytes().write(1, yawByte);
+			spawnPacket.getBytes().write(2, yawByte);
 
-			spawnPacket.getIntegers().write(4, 0); // Data
+			spawnPacket.getIntegers().write(4, 0);
 
 			protocolManager.sendServerPacket(player, spawnPacket);
-
-			sendMetadataPacket(player, entityId, isSelection);
+			sendMetadataPacket(player, entityId);
 
 		} catch (Exception e) {
 			plugin.getLogger().warning("Failed to spawn marker entity: " + e.getMessage());
 		}
 	}
 
-	private void sendMetadataPacket(Player player, int entityId, boolean isSelection) {
+	private void sendMetadataPacket(Player player, int entityId) {
 		try {
 			PacketContainer metadataPacket = protocolManager
 					.createPacket(PacketType.Play.Server.ENTITY_METADATA);
@@ -286,43 +265,31 @@ public class BorderVisualizer {
 
 			List<WrappedDataValue> dataValues = new ArrayList<>();
 
-			byte flags = 0x20; // Invisible
+			byte flags = 0x20;
 			dataValues.add(new WrappedDataValue(0, WrappedDataWatcher.Registry.get((Type) Byte.class),
 					flags));
 
-			// Scale
 			Vector3f scale = new Vector3f(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
 			dataValues.add(new WrappedDataValue(12, WrappedDataWatcher.Registry.get((Type) Vector3f.class),
 					scale));
 
-			// ItemStack display
-			Material material = isSelection ? Material.BARRIER : Material.BARRIER;
-			ItemStack displayItem = new ItemStack(material);
-
+			ItemStack displayItem = new ItemStack(Material.BARRIER);
 			Object nmsItem = BukkitConverters.getItemStackConverter().getGeneric(displayItem);
 			dataValues.add(new WrappedDataValue(23,
 					WrappedDataWatcher.Registry.getItemStackSerializer(false), nmsItem));
 
-			// Display type
-			// 8 = FIXED
 			dataValues.add(new WrappedDataValue(24, WrappedDataWatcher.Registry.get((Type) Byte.class),
 					(byte) 8));
-
-			// Billboard constraint
 			dataValues.add(new WrappedDataValue(15, WrappedDataWatcher.Registry.get((Type) Byte.class),
 					(byte) 0));
 
-			// Brightness override
 			int brightness = (15 << 4) | (15 << 20);
 			dataValues.add(new WrappedDataValue(16, WrappedDataWatcher.Registry.get((Type) Integer.class),
 					brightness));
-
-			// View range
 			dataValues.add(new WrappedDataValue(17, WrappedDataWatcher.Registry.get((Type) Float.class),
 					1.0f));
 
 			metadataPacket.getDataValueCollectionModifier().write(0, dataValues);
-
 			protocolManager.sendServerPacket(player, metadataPacket);
 
 		} catch (Exception e) {
@@ -344,29 +311,17 @@ public class BorderVisualizer {
 		}
 	}
 
-	public void cleanup() {
-		for (Map.Entry<UUID, VisualizationData> entry : activeVisuals.entrySet()) {
-			Player player = Bukkit.getPlayer(entry.getKey());
-			if (player != null && player.isOnline()) {
-				resetBorder(player);
-			}
-		}
-		activeVisuals.clear();
-	}
-
 	private static class VisualizationData {
 		final BoundingBox box;
 		final String worldName;
-		final boolean isSelection;
 		final Set<Integer> spawnedEntityIds = ConcurrentHashMap.newKeySet();
 		final Map<MarkerPosition, Integer> markerToEntityId = new ConcurrentHashMap<>();
 		Set<MarkerPosition> currentMarkers = new HashSet<>();
 		ScheduledTask updateTask;
 
-		VisualizationData(BoundingBox box, String worldName, boolean isSelection) {
+		VisualizationData(BoundingBox box, String worldName) {
 			this.box = box;
 			this.worldName = worldName;
-			this.isSelection = isSelection;
 		}
 	}
 

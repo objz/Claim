@@ -3,7 +3,7 @@ package dev.objz.claim.gui;
 import dev.objz.claim.Claim;
 import dev.objz.claim.gui.menu.ClaimGuiHolder;
 import dev.objz.claim.gui.menu.MainMenu;
-import dev.objz.claim.model.ClaimRegion;
+import dev.objz.claim.model.Region;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,7 +26,7 @@ public class GuiManager implements Listener {
 		}
 	}
 
-	public void openMainMenu(Player player, ClaimRegion claim) {
-		player.openInventory(new MainMenu(plugin, claim, player).getInventory());
+	public void openMainMenu(Player player, Region claim) {
+		player.openInventory(new MainMenu(plugin, claim).getInventory());
 	}
 }

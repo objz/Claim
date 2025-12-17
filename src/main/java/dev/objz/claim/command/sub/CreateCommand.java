@@ -1,12 +1,11 @@
-package dev.objz.claim.command.sub;
+package dev.objz.claim.command. sub;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel. commandapi.arguments.StringArgument;
 import dev.objz.claim.Claim;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text. Component;
+import net.kyori.adventure.text.format. NamedTextColor;
 import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 
 public class CreateCommand {
 	private final Claim plugin;
@@ -21,21 +20,16 @@ public class CreateCommand {
 				.executesPlayer((player, args) -> {
 					String name = (String) args.get("name");
 
-					if (!plugin.getSelectionManager().hasSelection(player)) {
-						player.sendMessage(Component.text(
-								"Please select a region with /claim tool first.",
-								NamedTextColor.RED));
+					if (! plugin.getSelectionManager().hasSelection(player)) {
+						player.sendMessage(Component.text("Please select a region with '/claim tool' first", NamedTextColor. RED));
 						return;
 					}
 
 					boolean nameExists = plugin.getClaimManager().getAllClaims().stream()
-							.anyMatch(c -> c.getOwner().equals(player.getUniqueId())
-									&& c.getName().equalsIgnoreCase(name));
+							.anyMatch(c -> c. getOwner().equals(player.getUniqueId()) && c.getName().equalsIgnoreCase(name));
 
 					if (nameExists) {
-						player.sendMessage(Component.text(
-								"You already have a claim named '" + name + "'.",
-								NamedTextColor.RED));
+						player.sendMessage(Component. text("You already have a claim named '" + name + "'", NamedTextColor.RED));
 						return;
 					}
 
@@ -44,18 +38,11 @@ public class CreateCommand {
 
 					plugin.getClaimManager().createClaim(player.getUniqueId(), name, p1, p2);
 
-					for (ItemStack item : player.getInventory().getContents()) {
-						if (plugin.getSelectionManager().isTool(item)) {
-							player.getInventory().remove(item);
-							break;
-						}
-					}
-
 					plugin.getSelectionManager().clearSelection(player);
-					plugin.getBorderVisualizer().stopVisual(player);
+					plugin.getSelectionManager().removeTool(player);
+					plugin.getBorderVisualizer().hideBorder(player);
 
-					player.sendMessage(Component.text("Claim '" + name + "' created!",
-							NamedTextColor.GREEN));
+					player.sendMessage(Component. text("Claim '" + name + "' created!", NamedTextColor.GREEN));
 				});
 	}
 }

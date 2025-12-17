@@ -2,7 +2,7 @@ package dev.objz.claim.command.sub;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.objz.claim.Claim;
-import dev.objz.claim.model.ClaimRegion;
+import dev.objz.claim.model.Region;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -18,18 +18,18 @@ public class ListCommand {
 	public CommandAPICommand getCommand() {
 		return new CommandAPICommand("list")
 				.executesPlayer((player, args) -> {
-					List<ClaimRegion> claims = plugin.getClaimManager().getAllClaims().stream()
+					List<Region> claims = plugin.getClaimManager().getAllClaims().stream()
 							.filter(c -> c.getOwner().equals(player.getUniqueId()))
 							.toList();
 
 					if (claims.isEmpty()) {
-						player.sendMessage(Component.text("You do not own any claims.",
+						player.sendMessage(Component.text("You do not own any claims",
 								NamedTextColor.YELLOW));
 						return;
 					}
 
 					player.sendMessage(Component.text("Your Claims:", NamedTextColor.GOLD));
-					for (ClaimRegion claim : claims) {
+					for (Region claim : claims) {
 						int x = (int) claim.getRegion().getCenter().getX();
 						int z = (int) claim.getRegion().getCenter().getZ();
 

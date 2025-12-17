@@ -1,12 +1,13 @@
 package dev.objz.claim.manager;
 
-import dev.objz.claim.Claim;
-import dev.objz.claim.model.ClaimFlag;
-import dev.objz.claim.model.ClaimRegion;
-import dev.objz.claim.model.ClaimRole;
-import org.bukkit.Bukkit;
+import dev.objz.claim. Claim;
+import dev.objz.claim.model.GlobalFlags;
+import dev.objz.claim.model.PlayerFlags;
+import dev.objz. claim.model.Region;
+import dev.objz.claim.model. Roles;
+import org.bukkit. Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit. configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.*;
 
 public class ClaimManager {
 	private final Claim plugin;
-	private final Map<UUID, ClaimRegion> claims = new HashMap<>();
+	private final Map<UUID, Region> claims = new HashMap<>();
 	private final File claimsFile;
 
 	public ClaimManager(Claim plugin) {
@@ -23,7 +24,7 @@ public class ClaimManager {
 		loadClaims();
 	}
 
-	public ClaimRegion createClaim(UUID owner, String name, Location pos1, Location pos2) {
+	public Region createClaim(UUID owner, String name, Location pos1, Location pos2) {
 		int x1 = pos1.getBlockX();
 		int z1 = pos1.getBlockZ();
 		int x2 = pos2.getBlockX();
@@ -40,7 +41,7 @@ public class ClaimManager {
 		Location lower = new Location(pos1.getWorld(), minX, minY, minZ);
 		Location upper = new Location(pos1.getWorld(), maxX, maxY, maxZ);
 
-		ClaimRegion claim = new ClaimRegion(owner, name, lower, upper);
+		Region claim = new Region(owner, name, lower, upper);
 		claims.put(claim.getId(), claim);
 		saveClaims();
 		return claim;
@@ -51,36 +52,39 @@ public class ClaimManager {
 		saveClaims();
 	}
 
-	public Optional<ClaimRegion> getClaimAt(Location location) {
+	public Optional<Region> getClaimAt(Location location) {
 		if (location == null || location.getWorld() == null)
 			return Optional.empty();
-		return claims.values().stream()
-				.filter(c -> c.contains(location))
-				.findFirst();
+		return claims.values().stream().filter(c -> c.contains(location)).findFirst();
 	}
 
-	public Collection<ClaimRegion> getAllClaims() {
-		return claims.values();
+	public Collection<Region> getAllClaims() {
+		return Collections.unmodifiableCollection(claims.values());
 	}
 
 	public void saveClaims() {
 		YamlConfiguration config = new YamlConfiguration();
 
-		for (ClaimRegion claim : claims.values()) {
+		for (Region claim : claims.values()) {
 			String path = "claims." + claim.getId().toString();
 			config.set(path + ".owner", claim.getOwner().toString());
 			config.set(path + ".name", claim.getName());
 			config.set(path + ".world", claim.getWorldName());
-			config.set(path + ".minX", claim.getRegion().getMinX());
+			config.set(path + ".minX", claim. getRegion().getMinX());
 			config.set(path + ".minY", claim.getRegion().getMinY());
 			config.set(path + ".minZ", claim.getRegion().getMinZ());
 			config.set(path + ".maxX", claim.getRegion().getMaxX());
-			config.set(path + ".maxY", claim.getRegion().getMaxY());
+			config.set(path + ".maxY", claim. getRegion().getMaxY());
 			config.set(path + ".maxZ", claim.getRegion().getMaxZ());
 
-			for (ClaimFlag flag : ClaimFlag.values()) {
-				if (flag.isGlobal()) {
-					config.set(path + ".flags." + flag.name(), claim.getFlag(flag));
+			for (GlobalFlags flag : GlobalFlags.values()) {
+				config.set(path + ".globalFlags." + flag.name(), claim.getFlag(flag));
+			}
+
+			for (Roles role : Roles.values()) {
+				for (PlayerFlags flag : PlayerFlags. values()) {
+					config.set(path + ".rolePermissions." + role.name() + "." + flag.name(),
+							claim.getFlag(role, flag));
 				}
 			}
 
@@ -92,16 +96,16 @@ public class ClaimManager {
 		try {
 			config.save(claimsFile);
 		} catch (IOException e) {
-			plugin.getLogger().severe("Could not save claims: " + e.getMessage());
+			plugin.getLogger().severe("Could not save claims:  " + e.getMessage());
 		}
 	}
 
 	private void loadClaims() {
-		if (!claimsFile.exists())
+		if (! claimsFile.exists())
 			return;
 
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(claimsFile);
-		if (!config.contains("claims"))
+		if (! config.contains("claims"))
 			return;
 
 		for (String key : config.getConfigurationSection("claims").getKeys(false)) {
@@ -123,15 +127,35 @@ public class ClaimManager {
 				Location p1 = new Location(Bukkit.getWorld(world), minX, minY, minZ);
 				Location p2 = new Location(Bukkit.getWorld(world), maxX, maxY, maxZ);
 
-				ClaimRegion claim = new ClaimRegion(owner, name, p1, p2);
+				Region claim = new Region(owner, name, p1, p2);
 
-				if (config.contains(path + ".flags")) {
-					for (String flagName : config.getConfigurationSection(path + ".flags")
+				if (config.contains(path + ".globalFlags")) {
+					for (String flagName : config.getConfigurationSection(path + ".globalFlags")
 							.getKeys(false)) {
 						try {
-							ClaimFlag flag = ClaimFlag.valueOf(flagName);
-							claim.setGlobalFlag(flag,
-									config.getBoolean(path + ".flags." + flagName));
+							GlobalFlags flag = GlobalFlags.valueOf(flagName);
+							claim.setFlag(flag, config.getBoolean(path + ".globalFlags." + flagName));
+						} catch (IllegalArgumentException ignored) {
+						}
+					}
+				}
+
+				if (config.contains(path + ".rolePermissions")) {
+					for (String roleName : config.getConfigurationSection(path + ".rolePermissions")
+							.getKeys(false)) {
+						try {
+							Roles role = Roles.valueOf(roleName);
+							for (String flagName : config.getConfigurationSection(
+									path + ".rolePermissions." + roleName)
+									.getKeys(false)) {
+								try {
+									PlayerFlags flag = PlayerFlags.valueOf(flagName);
+									claim.setFlag(role, flag, config. getBoolean(path
+											+ ".rolePermissions." + roleName
+											+ "." + flagName));
+								} catch (IllegalArgumentException ignored) {
+								}
+							}
 						} catch (IllegalArgumentException ignored) {
 						}
 					}
@@ -141,8 +165,7 @@ public class ClaimManager {
 					String[] parts = entry.split(":");
 					if (parts.length == 2) {
 						try {
-							claim.setMemberRole(UUID.fromString(parts[0]),
-									ClaimRole.valueOf(parts[1]));
+							claim.setRole(UUID.fromString(parts[0]), Roles.valueOf(parts[1]));
 						} catch (Exception ignored) {
 						}
 					}
@@ -151,7 +174,7 @@ public class ClaimManager {
 				claims.put(claim.getId(), claim);
 
 			} catch (Exception e) {
-				plugin.getLogger().warning("Failed to load claim " + key);
+				plugin.getLogger().warning("Failed to load claim " + key + ": " + e.getMessage());
 			}
 		}
 	}

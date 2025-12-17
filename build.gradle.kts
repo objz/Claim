@@ -22,7 +22,7 @@ dependencies {
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
     compileOnly("de.bluecolored:bluemap-api:2.7.7")
     
-    implementation("dev.jorel:commandapi-paper-shade:11.0.0")
+    implementation("dev.jorel:commandapi-paper-shade:11.1.0")
 }
 
 tasks {

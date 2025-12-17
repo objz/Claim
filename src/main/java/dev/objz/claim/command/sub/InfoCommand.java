@@ -1,7 +1,7 @@
 package dev.objz.claim.command.sub;
 
 import dev.objz.claim.Claim;
-import dev.objz.claim.model.ClaimRegion;
+import dev.objz.claim.model.Region;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -17,7 +17,7 @@ public class InfoCommand {
 	}
 
 	public void execute(Player player, CommandArguments args) {
-		Optional<ClaimRegion> claim = plugin.getClaimManager().getClaimAt(player.getLocation());
+		Optional<Region> claim = plugin.getClaimManager().getClaimAt(player.getLocation());
 
 		if (claim.isPresent()) {
 			if (claim.get().getOwner().equals(player.getUniqueId()) || player.isOp()) {
@@ -29,7 +29,7 @@ public class InfoCommand {
 						NamedTextColor.GRAY));
 			}
 		} else {
-			player.sendMessage(Component.text("No claim at this location.", NamedTextColor.YELLOW));
+			player.sendMessage(Component.text("No claim at this location", NamedTextColor.YELLOW));
 		}
 	}
 }

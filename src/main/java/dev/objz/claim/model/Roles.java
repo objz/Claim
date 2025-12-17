@@ -3,18 +3,17 @@ package dev.objz.claim.model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public enum ClaimRole {
-	OWNER("Owner", NamedTextColor.RED, 100),
-	ADMIN("Admin", NamedTextColor.GOLD, 50),
+public enum Roles {
+	OWNER("Owner", NamedTextColor.RED, 40),
+	ADMIN("Admin", NamedTextColor.GOLD, 30),
 	BUILDER("Builder", NamedTextColor.BLUE, 20),
-	SPECTATOR("Spectator", NamedTextColor.GRAY, 10),
-	VISITOR("Visitor", NamedTextColor.WHITE, 0);
+	VISITOR("Visitor", NamedTextColor.GRAY, 10);
 
 	private final String displayName;
 	private final NamedTextColor color;
 	private final int priority;
 
-	ClaimRole(String displayName, NamedTextColor color, int priority) {
+	Roles(String displayName, NamedTextColor color, int priority) {
 		this.displayName = displayName;
 		this.color = color;
 		this.priority = priority;
@@ -28,7 +27,7 @@ public enum ClaimRole {
 		return Component.text(displayName, color);
 	}
 
-	public boolean isAtLeast(ClaimRole other) {
+	public boolean isAtLeast(Roles other) {
 		return this.priority >= other.priority;
 	}
 }

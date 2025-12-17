@@ -6,7 +6,7 @@ import de.bluecolored.bluemap.api.markers.ShapeMarker;
 import de.bluecolored.bluemap.api.math.Color;
 import de.bluecolored.bluemap.api.math.Shape;
 import dev.objz.claim.Claim;
-import dev.objz.claim.model.ClaimRegion;
+import dev.objz.claim.model.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.util.BoundingBox;
 
@@ -34,7 +34,7 @@ public class ClaimBlueMap {
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(MARKER_SET_ID,
 					id -> MarkerSet.builder().label("Claims").build());
 
-			for (ClaimRegion claim : plugin.getClaimManager().getAllClaims()) {
+			for (Region claim : plugin.getClaimManager().getAllClaims()) {
 				if (!claim.getWorldName().equals(map.getWorld().getId()))
 					continue;
 

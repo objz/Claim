@@ -8,7 +8,7 @@ import dev.objz.claim.integration.ClaimBlueMap;
 import dev.objz.claim.listener.ClaimListener;
 import dev.objz.claim.manager.ClaimManager;
 import dev.objz.claim.manager.SelectionManager;
-import dev.objz.claim.visual.BorderVisualizer;
+import dev.objz.claim.visual.Border;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Claim extends JavaPlugin {
@@ -16,13 +16,13 @@ public class Claim extends JavaPlugin {
 	private static Claim instance;
 	private ClaimManager claimManager;
 	private SelectionManager selectionManager;
-	private BorderVisualizer borderVisualizer;
+	private Border borderVisualizer;
 	private GuiManager guiManager;
 	private ClaimBlueMap blueMapIntegration;
 
 	@Override
 	public void onLoad() {
-		CommandAPI.onLoad(new CommandAPIPaperConfig(this).verboseOutput(true));
+		CommandAPI.onLoad(new CommandAPIPaperConfig(this).verboseOutput(false));
 	}
 
 	@Override
@@ -31,12 +31,13 @@ public class Claim extends JavaPlugin {
 		CommandAPI.onEnable();
 
 		// Managers
-		this.borderVisualizer = new BorderVisualizer(this);
+		this.borderVisualizer = new Border(this);
 		this.claimManager = new ClaimManager(this);
 		this.selectionManager = new SelectionManager(this);
 		this.guiManager = new GuiManager(this);
 
 		new ClaimCommands(this).register();
+
 		getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
 		getServer().getPluginManager().registerEvents(selectionManager, this);
 		getServer().getPluginManager().registerEvents(guiManager, this);
@@ -76,7 +77,7 @@ public class Claim extends JavaPlugin {
 		return selectionManager;
 	}
 
-	public BorderVisualizer getBorderVisualizer() {
+	public Border getBorderVisualizer() {
 		return borderVisualizer;
 	}
 
