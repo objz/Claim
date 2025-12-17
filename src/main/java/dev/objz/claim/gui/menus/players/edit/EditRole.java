@@ -19,16 +19,11 @@ import java.util.UUID;
 public class EditRole extends Menu {
 	private final Claim plugin;
 	private final UUID targetUuid;
-	private final String targetName;
 
 	public EditRole(Claim plugin, Region claim, UUID targetUuid) {
 		super(claim, SIZE_SMALL, Component.text("Change Role"));
 		this.plugin = plugin;
 		this.targetUuid = targetUuid;
-
-		OfflinePlayer op = Bukkit.getOfflinePlayer(targetUuid);
-		this.targetName = op.getName() != null ? op.getName() : "Unknown";
-
 		build();
 	}
 

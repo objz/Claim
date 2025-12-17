@@ -8,6 +8,7 @@ import dev.objz.claim.model.Roles;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.util.BoundingBox;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +46,17 @@ public class ClaimManager {
 		claims.put(claim.getId(), claim);
 		saveClaims();
 		return claim;
+	}
+
+	public boolean isOverlapping(BoundingBox box, String worldName) {
+		for (Region claim : claims.values()) {
+			if (claim.getWorldName().equals(worldName)) {
+				if (claim.getRegion().overlaps(box)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public void deleteClaim(UUID claimId) {
@@ -88,7 +100,6 @@ public class ClaimManager {
 				}
 			}
 
-			// Save player overrides
 			if (!claim.getPlayerFlagOverrides().isEmpty()) {
 				for (Map.Entry<UUID, Map<PlayerFlags, Boolean>> entry : claim.getPlayerFlagOverrides()
 						.entrySet()) {
