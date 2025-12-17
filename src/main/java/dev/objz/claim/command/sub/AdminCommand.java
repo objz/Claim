@@ -3,7 +3,7 @@ package dev.objz.claim.command.sub;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.PlayerProfileArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
 import dev.objz.claim.util.MessageUtil;
@@ -48,7 +48,7 @@ public class AdminCommand {
 
 	private CommandAPICommand getDeleteCommand() {
 		return new CommandAPICommand("delete")
-				.withArguments(new StringArgument("claim_id")
+				.withArguments(new TextArgument("claim_id")
 						.replaceSuggestions(ArgumentSuggestions.strings(
 								info -> plugin.getClaimManager().getAllClaims().stream()
 										.map(c -> {
@@ -58,7 +58,7 @@ public class AdminCommand {
 													.getName();
 											return (owner != null ? owner
 													: "Unknown")
-													+ ":"
+													+ "."
 													+ c.getName();
 										})
 										.toArray(String[]::new))))
@@ -71,7 +71,7 @@ public class AdminCommand {
 							.filter(c -> {
 								String owner = Bukkit.getOfflinePlayer(c.getOwner())
 										.getName();
-								String check = (owner != null ? owner : "Unknown") + ":"
+								String check = (owner != null ? owner : "Unknown") + "."
 										+ c.getName();
 								return check.equals(id);
 							})

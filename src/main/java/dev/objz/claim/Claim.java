@@ -42,6 +42,7 @@ public class Claim extends JavaPlugin {
 
 		// Integrations
 		if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
+			getServer().getLogger().info("Enabling BlueMap integration");
 			this.blueMapIntegration = new ClaimBlueMap(this);
 			this.blueMapIntegration.enable();
 		}
