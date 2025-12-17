@@ -95,4 +95,8 @@ public class Claim extends JavaPlugin {
 	public GuiManager getGuiManager() {
 		return guiManager;
 	}
+
+	public BlueMap getBlueMap() {
+		return blueMap;
+	}
 }

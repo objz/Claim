@@ -45,17 +45,27 @@ public class ClaimManager {
 		Region claim = new Region(owner, name, lower, upper);
 		claims.put(claim.getId(), claim);
 		saveClaims();
+
+		updateVisuals(claim);
 		return claim;
 	}
 
 	public void resizeClaim(Region claim, BoundingBox newBox) {
 		claim.resize(newBox);
 		saveClaims();
+		updateVisuals(claim);
 	}
 
 	public void transferClaim(Region claim, UUID newOwner) {
 		claim.setOwner(newOwner);
 		saveClaims();
+		updateVisuals(claim);
+	}
+
+	public void renameClaim(Region claim, String newName) {
+		claim.setName(newName);
+		saveClaims();
+		updateVisuals(claim);
 	}
 
 	public boolean isOverlapping(BoundingBox box, String worldName) {
@@ -72,6 +82,19 @@ public class ClaimManager {
 	public void deleteClaim(UUID claimId) {
 		claims.remove(claimId);
 		saveClaims();
+		removeVisuals(claimId);
+	}
+
+	private void updateVisuals(Region claim) {
+		if (plugin.getBlueMap() != null) {
+			plugin.getBlueMap().updateClaim(claim);
+		}
+	}
+
+	private void removeVisuals(UUID claimId) {
+		if (plugin.getBlueMap() != null) {
+			plugin.getBlueMap().removeClaim(claimId);
+		}
 	}
 
 	public Optional<Region> getClaimAt(Location location) {

@@ -56,6 +56,10 @@ public class Region {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getWorldName() {
 		return worldName;
 	}

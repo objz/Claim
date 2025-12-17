@@ -24,6 +24,7 @@ public class ClaimCommands {
 				.withSubcommand(new ResizeCommand(plugin).getCommand())
 				.withSubcommand(new MemberCommand(plugin).getCommand())
 				.withSubcommand(new FlagCommand(plugin).getCommand())
+				.withSubcommand(new RenameCommand(plugin).getCommand())
 				.executesPlayer((player, args) -> {
 					new InfoCommand(plugin).execute(player, args);
 				})

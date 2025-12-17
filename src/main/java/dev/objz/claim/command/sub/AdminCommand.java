@@ -3,6 +3,7 @@ package dev.objz.claim.command.sub;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.PlayerProfileArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.arguments.TextArgument;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
@@ -25,7 +26,8 @@ public class AdminCommand {
 				.withSubcommand(getListCommand())
 				.withSubcommand(getDeleteCommand())
 				.withSubcommand(getBypassCommand())
-				.withSubcommand(getTransferCommand());
+				.withSubcommand(getTransferCommand())
+				.withSubcommand(getRenameCommand());
 	}
 
 	private CommandAPICommand getListCommand() {
@@ -122,6 +124,64 @@ public class AdminCommand {
 					plugin.getClaimManager().transferClaim(region, newOwner.getUniqueId());
 					MessageUtil.sendSuccess(player, "Transferred claim <yellow>" + region.getName()
 							+ "</yellow> to <aqua>" + newOwner.getName() + "</aqua>");
+				});
+	}
+
+	private CommandAPICommand getRenameCommand() {
+		return new CommandAPICommand("rename")
+				.withArguments(new TextArgument("claim_id")
+						.replaceSuggestions(ArgumentSuggestions.strings(
+								info -> plugin.getClaimManager().getAllClaims().stream()
+										.map(c -> {
+											String owner = Bukkit
+													.getOfflinePlayer(
+															c.getOwner())
+													.getName();
+											return (owner != null ? owner
+													: "Unknown")
+													+ "."
+													+ c.getName();
+										})
+										.toArray(String[]::new))))
+				.withArguments(new StringArgument("new_name"))
+				.executesPlayer((player, args) -> {
+					String id = (String) args.get("claim_id");
+					String newName = (String) args.get("new_name");
+					if (id == null || newName == null)
+						return;
+
+					Optional<Region> target = plugin.getClaimManager().getAllClaims().stream()
+							.filter(c -> {
+								String owner = Bukkit.getOfflinePlayer(c.getOwner())
+										.getName();
+								String check = (owner != null ? owner : "Unknown") + "."
+										+ c.getName();
+								return check.equals(id);
+							})
+							.findFirst();
+
+					if (target.isPresent()) {
+						Region claim = target.get();
+
+						boolean nameExists = plugin.getClaimManager().getAllClaims().stream()
+								.anyMatch(c -> c.getOwner().equals(claim.getOwner())
+										&& c.getName().equalsIgnoreCase(newName)
+										&& !c.getId().equals(claim.getId()));
+
+						if (nameExists) {
+							MessageUtil.sendError(player,
+									"Owner already has a claim named '" + newName
+											+ "'");
+							return;
+						}
+
+						String oldName = claim.getName();
+						plugin.getClaimManager().renameClaim(claim, newName);
+						MessageUtil.sendSuccess(player, "Renamed claim <gray>" + oldName
+								+ "</gray> to <yellow>" + newName + "</yellow>");
+					} else {
+						MessageUtil.sendError(player, "Claim not found");
+					}
 				});
 	}
 }
