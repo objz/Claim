@@ -1,13 +1,13 @@
 package dev.objz.claim.manager;
 
-import dev.objz.claim. Claim;
+import dev.objz.claim.Claim;
 import dev.objz.claim.model.GlobalFlags;
 import dev.objz.claim.model.PlayerFlags;
-import dev.objz. claim.model.Region;
-import dev.objz.claim.model. Roles;
-import org.bukkit. Bukkit;
+import dev.objz.claim.model.Region;
+import dev.objz.claim.model.Roles;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit. configuration.file.YamlConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,11 +70,11 @@ public class ClaimManager {
 			config.set(path + ".owner", claim.getOwner().toString());
 			config.set(path + ".name", claim.getName());
 			config.set(path + ".world", claim.getWorldName());
-			config.set(path + ".minX", claim. getRegion().getMinX());
+			config.set(path + ".minX", claim.getRegion().getMinX());
 			config.set(path + ".minY", claim.getRegion().getMinY());
 			config.set(path + ".minZ", claim.getRegion().getMinZ());
 			config.set(path + ".maxX", claim.getRegion().getMaxX());
-			config.set(path + ".maxY", claim. getRegion().getMaxY());
+			config.set(path + ".maxY", claim.getRegion().getMaxY());
 			config.set(path + ".maxZ", claim.getRegion().getMaxZ());
 
 			for (GlobalFlags flag : GlobalFlags.values()) {
@@ -82,9 +82,21 @@ public class ClaimManager {
 			}
 
 			for (Roles role : Roles.values()) {
-				for (PlayerFlags flag : PlayerFlags. values()) {
+				for (PlayerFlags flag : PlayerFlags.values()) {
 					config.set(path + ".rolePermissions." + role.name() + "." + flag.name(),
 							claim.getFlag(role, flag));
+				}
+			}
+
+			// Save player overrides
+			if (!claim.getPlayerFlagOverrides().isEmpty()) {
+				for (Map.Entry<UUID, Map<PlayerFlags, Boolean>> entry : claim.getPlayerFlagOverrides()
+						.entrySet()) {
+					String uuid = entry.getKey().toString();
+					for (Map.Entry<PlayerFlags, Boolean> flagEntry : entry.getValue().entrySet()) {
+						config.set(path + ".playerOverrides." + uuid + "."
+								+ flagEntry.getKey().name(), flagEntry.getValue());
+					}
 				}
 			}
 
@@ -101,11 +113,11 @@ public class ClaimManager {
 	}
 
 	private void loadClaims() {
-		if (! claimsFile.exists())
+		if (!claimsFile.exists())
 			return;
 
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(claimsFile);
-		if (! config.contains("claims"))
+		if (!config.contains("claims"))
 			return;
 
 		for (String key : config.getConfigurationSection("claims").getKeys(false)) {
@@ -134,7 +146,8 @@ public class ClaimManager {
 							.getKeys(false)) {
 						try {
 							GlobalFlags flag = GlobalFlags.valueOf(flagName);
-							claim.setFlag(flag, config.getBoolean(path + ".globalFlags." + flagName));
+							claim.setFlag(flag, config
+									.getBoolean(path + ".globalFlags." + flagName));
 						} catch (IllegalArgumentException ignored) {
 						}
 					}
@@ -149,10 +162,35 @@ public class ClaimManager {
 									path + ".rolePermissions." + roleName)
 									.getKeys(false)) {
 								try {
-									PlayerFlags flag = PlayerFlags.valueOf(flagName);
-									claim.setFlag(role, flag, config. getBoolean(path
+									PlayerFlags flag = PlayerFlags
+											.valueOf(flagName);
+									claim.setFlag(role, flag, config.getBoolean(path
 											+ ".rolePermissions." + roleName
 											+ "." + flagName));
+								} catch (IllegalArgumentException ignored) {
+								}
+							}
+						} catch (IllegalArgumentException ignored) {
+						}
+					}
+				}
+
+				if (config.contains(path + ".playerOverrides")) {
+					for (String uuidStr : config.getConfigurationSection(path + ".playerOverrides")
+							.getKeys(false)) {
+						try {
+							UUID playerUuid = UUID.fromString(uuidStr);
+							for (String flagName : config
+									.getConfigurationSection(path
+											+ ".playerOverrides." + uuidStr)
+									.getKeys(false)) {
+								try {
+									PlayerFlags flag = PlayerFlags
+											.valueOf(flagName);
+									boolean value = config.getBoolean(path
+											+ ".playerOverrides." + uuidStr
+											+ "." + flagName);
+									claim.setPlayerFlag(playerUuid, flag, value);
 								} catch (IllegalArgumentException ignored) {
 								}
 							}
@@ -165,7 +203,8 @@ public class ClaimManager {
 					String[] parts = entry.split(":");
 					if (parts.length == 2) {
 						try {
-							claim.setRole(UUID.fromString(parts[0]), Roles.valueOf(parts[1]));
+							claim.setRole(UUID.fromString(parts[0]),
+									Roles.valueOf(parts[1]));
 						} catch (Exception ignored) {
 						}
 					}

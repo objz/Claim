@@ -1,26 +1,34 @@
-package dev.objz.claim.gui.menus.players.add;
+package dev.objz.claim.gui.menus.players.edit;
 
 import dev.objz.claim.Claim;
 import dev.objz.claim.gui.framework.Menu;
-import dev.objz.claim.gui.menus.players.PlayerManagementMenu;
 import dev.objz.claim.model.Region;
 import dev.objz.claim.model.Roles;
 import dev.objz.claim.util.HeadUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.UUID;
 
-public class SelectRole extends Menu {
+public class EditRole extends Menu {
 	private final Claim plugin;
-	private final Player targetPlayer;
+	private final UUID targetUuid;
+	private final String targetName;
 
-	public SelectRole(Claim plugin, Region claim, Player targetPlayer) {
-		super(claim, SIZE_SMALL, Component.text("Select Role for " + targetPlayer.getName()));
+	public EditRole(Claim plugin, Region claim, UUID targetUuid) {
+		super(claim, SIZE_SMALL, Component.text("Change Role"));
 		this.plugin = plugin;
-		this.targetPlayer = targetPlayer;
+		this.targetUuid = targetUuid;
+
+		OfflinePlayer op = Bukkit.getOfflinePlayer(targetUuid);
+		this.targetName = op.getName() != null ? op.getName() : "Unknown";
+
 		build();
 	}
 
@@ -41,6 +49,10 @@ public class SelectRole extends Menu {
 						Component.text("Basic permissions", NamedTextColor.GRAY),
 						Component.text("Limited interactions", NamedTextColor.GRAY)));
 
+		OfflinePlayer op = Bukkit.getOfflinePlayer(targetUuid);
+		ItemStack head = HeadUtil.createPlayerHead(op, null);
+		setItem(4, head);
+
 		setItem(22, HeadUtil.createCustomHead("Back", HeadUtil.ARROW_LEFT,
 				List.of(Component.text("Cancel and go back", NamedTextColor.GRAY))));
 
@@ -57,20 +69,16 @@ public class SelectRole extends Menu {
 			case 15 -> selectedRole = Roles.VISITOR;
 			case 22 -> {
 				playBackSound(player);
-				player.openInventory(new AddPlayer(plugin, claim).getInventory());
+				player.openInventory(new ListMembers(plugin, claim).getInventory());
 				return;
 			}
 		}
 
 		if (selectedRole != null) {
-			claim.setRole(targetPlayer.getUniqueId(), selectedRole);
+			claim.setRole(targetUuid, selectedRole);
 			plugin.getClaimManager().saveClaims();
-			player.sendMessage(Component.text(
-					"Added " + targetPlayer.getName() + " as " + selectedRole.getDisplayName(),
-					NamedTextColor.GREEN));
 			playSuccessSound(player);
-
-			player.openInventory(new PlayerManagementMenu(plugin, claim).getInventory());
+			player.openInventory(new ListMembers(plugin, claim).getInventory());
 		}
 	}
 }

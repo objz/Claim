@@ -1,7 +1,7 @@
-package dev.objz. claim.model;
+package dev.objz.claim.model;
 
 import org.bukkit.Location;
-import org.bukkit. util.BoundingBox;
+import org.bukkit.util.BoundingBox;
 
 import java.util.*;
 
@@ -59,7 +59,7 @@ public class Region {
 	}
 
 	public boolean contains(Location loc) {
-		return loc.getWorld().getName().equals(worldName) && region.contains(loc. toVector());
+		return loc.getWorld().getName().equals(worldName) && region.contains(loc.toVector());
 	}
 
 	public boolean getFlag(GlobalFlags flag) {
@@ -76,7 +76,29 @@ public class Region {
 		}
 
 		Roles role = getRole(player);
-		return rolePermissions.getOrDefault(role, Collections.emptyMap()).getOrDefault(flag, flag.getDefaultValue());
+		return rolePermissions.getOrDefault(role, Collections.emptyMap()).getOrDefault(flag,
+				flag.getDefaultValue());
+	}
+
+	public Boolean getPlayerFlagOverride(UUID player, PlayerFlags flag) {
+		if (playerFlagOverrides.containsKey(player)) {
+			return playerFlagOverrides.get(player).get(flag);
+		}
+		return null;
+	}
+
+	public void setPlayerFlag(UUID player, PlayerFlags flag, Boolean value) {
+		if (value == null) {
+			if (playerFlagOverrides.containsKey(player)) {
+				playerFlagOverrides.get(player).remove(flag);
+				if (playerFlagOverrides.get(player).isEmpty()) {
+					playerFlagOverrides.remove(player);
+				}
+			}
+		} else {
+			playerFlagOverrides.computeIfAbsent(player, k -> new EnumMap<>(PlayerFlags.class)).put(flag,
+					value);
+		}
 	}
 
 	public void setFlag(Roles role, PlayerFlags flag, boolean value) {
@@ -84,16 +106,18 @@ public class Region {
 	}
 
 	public boolean getFlag(Roles role, PlayerFlags flag) {
-		return rolePermissions.getOrDefault(role, Collections.emptyMap()).getOrDefault(flag, flag. getDefaultValue());
+		return rolePermissions.getOrDefault(role, Collections.emptyMap()).getOrDefault(flag,
+				flag.getDefaultValue());
 	}
 
 	public Roles getRole(UUID player) {
-		if (player. equals(owner)) return Roles.OWNER;
+		if (player.equals(owner))
+			return Roles.OWNER;
 		return members.getOrDefault(player, Roles.VISITOR);
 	}
 
 	public void setRole(UUID player, Roles role) {
-		if (role == null || role == Roles.VISITOR) {
+		if (role == null) {
 			members.remove(player);
 		} else {
 			members.put(player, role);
@@ -104,25 +128,29 @@ public class Region {
 		return Collections.unmodifiableMap(members);
 	}
 
+	public Map<UUID, Map<PlayerFlags, Boolean>> getPlayerFlagOverrides() {
+		return Collections.unmodifiableMap(playerFlagOverrides);
+	}
+
 	private void initializeDefaults() {
-		for (GlobalFlags flag : GlobalFlags. values()) {
+		for (GlobalFlags flag : GlobalFlags.values()) {
 			globalFlags.put(flag, flag.getDefaultValue());
 		}
 
-		for (Roles role : Roles. values()) {
+		for (Roles role : Roles.values()) {
 			Map<PlayerFlags, Boolean> perms = new EnumMap<>(PlayerFlags.class);
-			for (PlayerFlags flag : PlayerFlags. values()) {
+			for (PlayerFlags flag : PlayerFlags.values()) {
 				if (role == Roles.OWNER || role == Roles.ADMIN) {
 					perms.put(flag, true);
 				} else if (role == Roles.BUILDER) {
 					perms.put(flag, flag == PlayerFlags.BLOCK_BREAK
-							|| flag == PlayerFlags. BLOCK_PLACE
-							|| flag == PlayerFlags. INTERACT);
+							|| flag == PlayerFlags.BLOCK_PLACE
+							|| flag == PlayerFlags.INTERACT);
 				} else {
-					perms.put(flag, flag. getDefaultValue());
+					perms.put(flag, flag.getDefaultValue());
 				}
 			}
-			rolePermissions. put(role, perms);
+			rolePermissions.put(role, perms);
 		}
 	}
 }

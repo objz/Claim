@@ -8,8 +8,11 @@ import dev.objz.claim.integration.ClaimBlueMap;
 import dev.objz.claim.listener.ClaimListener;
 import dev.objz.claim.manager.ClaimManager;
 import dev.objz.claim.manager.SelectionManager;
+import dev.objz.claim.util.HeadUtil;
 import dev.objz.claim.visual.Border;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class Claim extends JavaPlugin {
 
@@ -30,7 +33,8 @@ public class Claim extends JavaPlugin {
 		instance = this;
 		CommandAPI.onEnable();
 
-		// Managers
+		HeadUtil.loadCache(new File(getDataFolder(), "head_cache.yml"));
+
 		this.borderVisualizer = new Border(this);
 		this.claimManager = new ClaimManager(this);
 		this.selectionManager = new SelectionManager(this);
@@ -63,6 +67,7 @@ public class Claim extends JavaPlugin {
 		if (claimManager != null) {
 			claimManager.saveClaims();
 		}
+		HeadUtil.saveCache(new File(getDataFolder(), "head_cache.yml"));
 	}
 
 	public static Claim getInstance() {

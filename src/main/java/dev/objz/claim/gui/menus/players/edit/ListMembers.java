@@ -1,6 +1,7 @@
 package dev.objz.claim.gui.menus.players.edit;
 
 import dev.objz.claim.Claim;
+import dev.objz.claim.gui.framework.ConfirmationMenu;
 import dev.objz.claim.gui.framework.PaginatedMenu;
 import dev.objz.claim.gui.menus.players.PlayerManagementMenu;
 import dev.objz.claim.model.Region;
@@ -49,8 +50,10 @@ public class ListMembers extends PaginatedMenu<Map.Entry<UUID, Roles>> {
 		if (role != Roles.OWNER) {
 			lore.add(Component.text("Left-Click ", NamedTextColor.YELLOW)
 					.append(Component.text("Change Role", NamedTextColor.GRAY)));
-			lore.add(Component.text("Right-Click ", NamedTextColor.RED)
+			lore.add(Component.text("Right-Click ", NamedTextColor.AQUA)
 					.append(Component.text("Permission Override", NamedTextColor.GRAY)));
+			lore.add(Component.text("Middle-Click ", NamedTextColor.RED)
+					.append(Component.text("Remove Member", NamedTextColor.GRAY)));
 		} else {
 			lore.add(Component.text("Owner cannot be modified", NamedTextColor.RED));
 		}
@@ -72,16 +75,37 @@ public class ListMembers extends PaginatedMenu<Map.Entry<UUID, Roles>> {
 
 		if (clickType == ClickType.LEFT) {
 			playClickSound(player);
-			Roles nextRole = getNextRole(currentRole);
-			claim.setRole(targetUuid, nextRole);
-			player.sendMessage(Component.text("Role changed to " + nextRole.getDisplayName(),
-					NamedTextColor.GREEN));
-			inventory.clear();
-			build();
+			player.openInventory(new EditRole(plugin, claim, targetUuid).getInventory());
 		} else if (clickType == ClickType.RIGHT) {
 			playClickSound(player);
 			player.openInventory(
 					new EditPermissions(plugin, claim, targetUuid).getInventory());
+		} else if (clickType == ClickType.MIDDLE) {
+			playClickSound(player);
+			OfflinePlayer op = Bukkit.getOfflinePlayer(targetUuid);
+			String name = op.getName() == null ? "Unknown" : op.getName();
+
+			ConfirmationMenu confirmMenu = new ConfirmationMenu(
+					claim,
+					Component.text("Remove " + name + "?"),
+					Component.text("Are you sure you want to remove this member?",
+							NamedTextColor.RED),
+					List.of(
+							Component.text("Remove " + name, NamedTextColor.RED),
+							Component.text("from the claim", NamedTextColor.RED)),
+					p -> {
+						claim.setRole(targetUuid, null);
+						plugin.getClaimManager().saveClaims();
+						p.playSound(p.getLocation(),
+								org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+								1f, 1f);
+						p.openInventory(new ListMembers(plugin, claim).getInventory());
+					},
+					p -> {
+						playBackSound(p);
+						p.openInventory(new ListMembers(plugin, claim).getInventory());
+					});
+			player.openInventory(confirmMenu.getInventory());
 		}
 	}
 
@@ -89,13 +113,5 @@ public class ListMembers extends PaginatedMenu<Map.Entry<UUID, Roles>> {
 	protected void handleBack(Player player) {
 		playBackSound(player);
 		player.openInventory(new PlayerManagementMenu(plugin, claim).getInventory());
-	}
-
-	private Roles getNextRole(Roles current) {
-		return switch (current) {
-			case ADMIN -> Roles.BUILDER;
-			case BUILDER -> Roles.VISITOR;
-			default -> Roles.ADMIN;
-		};
 	}
 }
