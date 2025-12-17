@@ -65,9 +65,6 @@ public class SelectRole extends Menu {
 		if (selectedRole != null) {
 			claim.setRole(targetPlayer.getUniqueId(), selectedRole);
 			plugin.getClaimManager().saveClaims();
-			player.sendMessage(Component.text(
-					"Added " + targetPlayer.getName() + " as " + selectedRole.getDisplayName(),
-					NamedTextColor.GREEN));
 			playSuccessSound(player);
 
 			player.openInventory(new PlayerManagementMenu(plugin, claim).getInventory());

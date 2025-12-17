@@ -174,9 +174,8 @@ public class SelectionManager implements Listener {
 
 		Location target = result.getHitBlock().getLocation();
 
-		// Check if the target block is inside an existing claim
 		if (plugin.getClaimManager().getClaimAt(target).isPresent()) {
-			player.sendMessage(Component.text("You cannot set a claim corner inside an existing claim.", NamedTextColor.RED));
+			player.sendMessage(Component.text("You cannot set a claim corner inside an existing claim", NamedTextColor.RED));
 			return;
 		}
 
