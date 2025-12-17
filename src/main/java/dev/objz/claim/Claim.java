@@ -5,11 +5,12 @@ import dev.jorel.commandapi.CommandAPIPaperConfig;
 import dev.objz.claim.command.ClaimCommands;
 import dev.objz.claim.gui.GuiManager;
 import dev.objz.claim.integration.ClaimBlueMap;
-import dev.objz.claim.listener.ClaimListener;
+import dev.objz.claim.listener.*;
 import dev.objz.claim.manager.ClaimManager;
 import dev.objz.claim.manager.SelectionManager;
 import dev.objz.claim.util.HeadUtil;
 import dev.objz.claim.visual.Border;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -42,17 +43,26 @@ public class Claim extends JavaPlugin {
 
 		new ClaimCommands(this).register();
 
-		getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
-		getServer().getPluginManager().registerEvents(selectionManager, this);
-		getServer().getPluginManager().registerEvents(guiManager, this);
+		registerListeners();
 
 		// Integrations
 		if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
 			this.blueMapIntegration = new ClaimBlueMap(this);
 			this.blueMapIntegration.enable();
 		}
+	}
 
-		getLogger().info("Claim plugin enabled for Folia!");
+	private void registerListeners() {
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(new ConnectionListener(this), this);
+		pm.registerEvents(new BlockListener(this), this);
+		pm.registerEvents(new InteractListener(this), this);
+		pm.registerEvents(new ItemListener(this), this);
+		pm.registerEvents(new EntityListener(this), this);
+		pm.registerEvents(new MovementListener(this), this);
+
+		pm.registerEvents(selectionManager, this);
+		pm.registerEvents(guiManager, this);
 	}
 
 	@Override
