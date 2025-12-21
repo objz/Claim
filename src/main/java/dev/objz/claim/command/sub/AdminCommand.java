@@ -27,7 +27,24 @@ public class AdminCommand {
 				.withSubcommand(getDeleteCommand())
 				.withSubcommand(getBypassCommand())
 				.withSubcommand(getTransferCommand())
-				.withSubcommand(getRenameCommand());
+				.withSubcommand(getRenameCommand())
+				.withSubcommand(getReloadCommand());
+	}
+
+	private CommandAPICommand getReloadCommand() {
+		return new CommandAPICommand("reload")
+				.executes((sender, args) -> {
+					try {
+						plugin.getClaimManager().saveClaims();
+						plugin.getClaimManager().reload();
+						MessageUtil.sendSuccess(sender,
+								"Claims configuration reloaded successfully");
+					} catch (Exception e) {
+						MessageUtil.sendError(sender,
+								"Failed to reload claims: " + e.getMessage());
+						e.printStackTrace();
+					}
+				});
 	}
 
 	private CommandAPICommand getListCommand() {

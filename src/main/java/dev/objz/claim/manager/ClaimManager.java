@@ -25,6 +25,11 @@ public class ClaimManager {
 		loadClaims();
 	}
 
+	public void reload() {
+		claims.clear();
+		loadClaims();
+	}
+
 	public Region createClaim(UUID owner, String name, Location pos1, Location pos2) {
 		int x1 = pos1.getBlockX();
 		int z1 = pos1.getBlockZ();
@@ -131,7 +136,6 @@ public class ClaimManager {
 			config.set(path + ".maxY", claim.getRegion().getMaxY());
 			config.set(path + ".maxZ", claim.getRegion().getMaxZ());
 
-			// Save the calculated Y coordinate
 			config.set(path + ".markerY", claim.getMarkerY());
 
 			for (GlobalFlags flag : GlobalFlags.values()) {

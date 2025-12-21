@@ -85,7 +85,7 @@ public class HeadUtil {
 		String name = player.getName() != null ? player.getName() : "Unknown";
 		meta.displayName(Component.text(name, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
 
-		if (!player.isOnline() && textureCache.containsKey(player.getUniqueId())) {
+		if (textureCache.containsKey(player.getUniqueId())) {
 			applyTexture(meta, textureCache.get(player.getUniqueId()));
 		} else {
 			meta.setOwningPlayer(player);

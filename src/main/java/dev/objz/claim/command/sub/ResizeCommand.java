@@ -1,11 +1,10 @@
 package dev.objz.claim.command.sub;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.objz.claim.Claim;
 import dev.objz.claim.model.Region;
 import dev.objz.claim.util.MessageUtil;
-import org.bukkit.block.BlockFace;
+import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
 
 import java.util.Optional;
@@ -19,17 +18,13 @@ public class ResizeCommand {
 
 	public CommandAPICommand getCommand() {
 		return new CommandAPICommand("resize")
-				.withArguments(new IntegerArgument("amount"))
 				.executesPlayer((player, args) -> {
-					int amount = (int) args.get("amount");
-					if (amount == 0)
-						return;
-
 					Optional<Region> claimOpt = plugin.getClaimManager()
 							.getClaimAt(player.getLocation());
+
 					if (claimOpt.isEmpty()) {
 						MessageUtil.sendError(player,
-								"You must be standing inside a claim to resize it");
+								"You must be standing inside the claim you want to resize");
 						return;
 					}
 
@@ -40,39 +35,46 @@ public class ResizeCommand {
 						return;
 					}
 
-					BlockFace facing = player.getFacing();
-					switch (facing) {
-						case NORTH, SOUTH, EAST, WEST -> {
+					if (!plugin.getSelectionManager().hasSelection(player)) {
+						if (!plugin.getSelectionManager().hasTool(player)) {
+							plugin.getSelectionManager().giveTool(player);
 						}
-						default -> {
-							MessageUtil.sendError(player,
-									"Please look directly North, South, East, or West");
-							return;
-						}
-					}
 
-					BoundingBox currentBox = claim.getRegion();
-					double minX = currentBox.getMinX();
-					double minZ = currentBox.getMinZ();
-					double maxX = currentBox.getMaxX();
-					double maxZ = currentBox.getMaxZ();
+						plugin.getBorderVisualizer().showBorder(player, claim.getRegion(),
+								claim.getWorldName());
 
-					switch (facing) {
-						case NORTH -> minZ -= amount; // North is negative Z
-						case SOUTH -> maxZ += amount; // South is positive Z
-						case WEST -> minX -= amount; // West is negative X
-						case EAST -> maxX += amount; // East is positive X
-						default -> {
-						}
-					}
-
-					if (maxX - minX < 5 || maxZ - minZ < 5) {
-						MessageUtil.sendError(player, "Claim would become too small");
+						MessageUtil.sendInfo(player, "<b>Resize Mode Started</b>");
+						MessageUtil.sendInfo(player,
+								"1. Use the <gold>Golden Shovel</gold> to select new corners.");
+						MessageUtil.sendInfo(player,
+								"2. Type <yellow>/claim resize</yellow> again to confirm changes.");
 						return;
 					}
 
-					BoundingBox newBox = new BoundingBox(minX, currentBox.getMinY(), minZ, maxX,
-							currentBox.getMaxY(), maxZ);
+					Location p1 = plugin.getSelectionManager().getPos1(player);
+					Location p2 = plugin.getSelectionManager().getPos2(player);
+
+					if (!p1.getWorld().getName().equals(claim.getWorldName()) ||
+							!p2.getWorld().getName().equals(claim.getWorldName())) {
+						MessageUtil.sendError(player,
+								"Selection must be in the same world as the claim");
+						return;
+					}
+
+					int minX = Math.min(p1.getBlockX(), p2.getBlockX());
+					int minZ = Math.min(p1.getBlockZ(), p2.getBlockZ());
+					int maxX = Math.max(p1.getBlockX(), p2.getBlockX()) + 1;
+					int maxZ = Math.max(p1.getBlockZ(), p2.getBlockZ()) + 1;
+
+					double minY = p1.getWorld().getMinHeight();
+					double maxY = p1.getWorld().getMaxHeight();
+
+					if (maxX - minX < 5 || maxZ - minZ < 5) {
+						MessageUtil.sendError(player, "Claim must be at least 5x5 blocks");
+						return;
+					}
+
+					BoundingBox newBox = new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
 					boolean overlaps = plugin.getClaimManager().getAllClaims().stream()
 							.filter(c -> !c.getId().equals(claim.getId())) // Ignore self
@@ -81,16 +83,15 @@ public class ResizeCommand {
 
 					if (overlaps) {
 						MessageUtil.sendError(player,
-								"Resizing would overlap with another claim");
+								"New size would overlap with another claim");
 						return;
 					}
 
 					plugin.getClaimManager().resizeClaim(claim, newBox);
 
-					if (plugin.getBorderVisualizer().isActive(player)) {
-						plugin.getBorderVisualizer().showBorder(player, newBox,
-								claim.getWorldName());
-					}
+					plugin.getSelectionManager().clearSelection(player);
+					plugin.getSelectionManager().removeTool(player);
+					plugin.getBorderVisualizer().showBorder(player, newBox, claim.getWorldName());
 
 					MessageUtil.sendSuccess(player, "Claim resized successfully!");
 				});

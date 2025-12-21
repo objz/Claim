@@ -77,7 +77,7 @@ public class SelectionManager implements Listener {
 		}
 	}
 
-	private boolean hasTool(Player player) {
+	public boolean hasTool(Player player) {
 		for (ItemStack item : player.getInventory().getContents()) {
 			if (isTool(item)) {
 				return true;
@@ -86,7 +86,7 @@ public class SelectionManager implements Listener {
 		return false;
 	}
 
-	private void giveTool(Player player) {
+	public void giveTool(Player player) {
 		ItemStack tool = new ItemStack(TOOL_MATERIAL);
 		ItemMeta meta = tool.getItemMeta();
 		meta.displayName(MessageUtil.parse("<gold>Claim Tool</gold>", false));
@@ -174,37 +174,20 @@ public class SelectionManager implements Listener {
 		Location target = result.getHitBlock().getLocation();
 
 		if (plugin.getClaimManager().getClaimAt(target).isPresent()) {
-			MessageUtil.sendError(player, "You cannot set a claim corner inside an existing claim");
-			return;
+
 		}
 
 		if (isLeftClick) {
-			Location oldPos = pos1.get(player.getUniqueId());
 			pos1.put(player.getUniqueId(), target);
 
 			if (isSelectionOverlapping(player)) {
-				if (oldPos != null)
-					pos1.put(player.getUniqueId(), oldPos);
-				else
-					pos1.remove(player.getUniqueId());
-				MessageUtil.sendError(player,
-						"You cannot create a selection that overlaps with an existing claim");
-				return;
 			}
 
 			MessageUtil.sendInfo(player, "Position 1 set at <yellow>" + formatLoc(target) + "</yellow>");
 		} else if (isRightClick) {
-			Location oldPos = pos2.get(player.getUniqueId());
 			pos2.put(player.getUniqueId(), target);
 
 			if (isSelectionOverlapping(player)) {
-				if (oldPos != null)
-					pos2.put(player.getUniqueId(), oldPos);
-				else
-					pos2.remove(player.getUniqueId());
-				MessageUtil.sendError(player,
-						"You cannot create a selection that overlaps with an existing claim");
-				return;
 			}
 
 			MessageUtil.sendInfo(player, "Position 2 set at <yellow>" + formatLoc(target) + "</yellow>");

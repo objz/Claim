@@ -16,10 +16,15 @@ public class ConnectionListener extends AbstractListener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		PlayerProfile profile = event.getPlayer().getPlayerProfile();
-		
+
 		if (!profile.hasProperty("textures")) {
-			profile.complete(false); 
+			try {
+				profile.complete(false);
+			} catch (Exception ignored) {
+			}
 		}
+
+		event.getPlayer().setPlayerProfile(profile);
 
 		for (ProfileProperty property : profile.getProperties()) {
 			if ("textures".equals(property.getName())) {
